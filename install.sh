@@ -52,6 +52,13 @@ if ! command -v yq >/dev/null 2>&1; then
     printResult 0 $?
 fi
 
+# Ensure Git is installed
+if ! command -v git >/dev/null 2>&1; then
+    printProgress "Installing Git" "$YELLOW"
+    sudo apt-get install -y git >/dev/null 2>&1
+    printResult 0 $?
+fi
+
 # Read packages from the YAML configuration file
 packages=$(yq eval '.packages[]' "$CONFIG_FILE")
 
