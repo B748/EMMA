@@ -47,16 +47,26 @@ fi
 
 # Parse the YAML file using yq (a lightweight YAML processor)
 if ! command -v yq >/dev/null 2>&1; then
-    printProgress "Installing yq (YAML processor)" "$YELLOW"
+    echo " ★ Installing yq (YAML processor)"
     sudo apt-get install -y yq >/dev/null 2>&1
-    printResult 0 $?
+    if [ $? -eq 0 ]; then
+        echo "yq installed successfully."
+    else
+        echo "Failed to install yq."
+        exit 1
+    fi
 fi
 
 # Ensure Git is installed
 if ! command -v git >/dev/null 2>&1; then
-    printProgress "Installing Git" "$YELLOW"
+    echo " ★ Installing Git"
     sudo apt-get install -y git >/dev/null 2>&1
-    printResult 0 $?
+    if [ $? -eq 0 ]; then
+        echo "Git installed successfully."
+    else
+        echo "Failed to install Git."
+        exit 1
+    fi
 fi
 
 # Read packages from the YAML configuration file
@@ -64,9 +74,14 @@ packages=$(yq eval '.packages[]' "$CONFIG_FILE")
 
 # Install each package listed in the configuration file
 for package in $packages; do
-    printProgress "Installing $package" "$YELLOW"
+    echo " ★ Installing $package"
     sudo apt-get install -y "$package" >/dev/null 2>&1
-    printResult 0 $?
+    if [ $? -eq 0 ]; then
+        echo "$package installed successfully."
+    else
+        echo "Failed to install $package."
+        exit 1
+    fi
 done
 
 # Read the PAT and repository URLs from the YAML configuration file
@@ -75,9 +90,14 @@ repos=$(yq eval '.repos[]' "$CONFIG_FILE")
 
 if [ -n "$PAT" ] && [ -n "$repos" ]; then
     for repo in $repos; do
-        printProgress "Cloning repository $repo" "$YELLOW"
+        echo " ★ Cloning repository $repo"
         git clone "https://${PAT}@${repo#https://}" >/dev/null 2>&1
-        printResult 0 $?
+        if [ $? -eq 0 ]; then
+            echo "Repository $repo cloned successfully."
+        else
+            echo "Failed to clone repository $repo."
+            exit 1
+        fi
     done
 else
     echo "No repositories or PAT found in the configuration file."
