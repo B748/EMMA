@@ -1,29 +1,57 @@
-# EMMA
+# EMMA - Essential Machine Management Automation
 
-**Essential Machine Management Automation**
+## Overview
+EMMA is a lightweight Bash-based automation script designed to simplify system setup tasks on Unix-based systems. It uses a configuration file to define the list of packages and other setup parameters.
 
-EMMA is a flexible and extensible automation script designed to simplify setup and configuration tasks on Unix-based systems (e.g., Ubuntu, Debian).
+## Usage
 
-## Features
+### Running the Script
+You can run the script with or without specifying a configuration file:
 
-- Initial system setup.
-- Installation of essential tools and packages.
-- Easily extendable for custom tasks.
+1. **Using a Custom Configuration File:**
+   ```bash
+   ./install.sh my-config.yaml
+   ```
 
-## Getting Started
+2. **Using the Default Configuration File (`config.yaml`):**
+   If no file is specified, the script will look for a file named `config.yaml` in the current directory:
+   ```bash
+   ./install.sh
+   ```
 
-You can quickly get started with EMMA using a one-liner command to download and execute the script:
+3. **Error Handling:**
+   If neither a custom file nor `config.yaml` exists, the script will exit with an error:
+   ```
+   Error: Configuration file 'config.yaml' not found.
+   ```
 
-### Using `curl`
-```bash
-bash <(curl -sSL https://raw.githubusercontent.com/B748/EMMA/main/install.sh)
+### Configuration File (`config.yaml`)
+The configuration file must be written in YAML format. It can include the following sections:
+
+#### Example `config.yaml`:
+```yaml
+# List of packages to install
+packages:
+  - docker.io
+  - git
+
+# Additional configuration options (future use)
+# pat: "your_personal_access_token"
+# repos:
+#   - "repo-name-1"
+#   - "repo-name-2"
 ```
 
-### Using `wget`
-```bash
-wget -qO- https://raw.githubusercontent.com/B748/EMMA/main/install.sh | bash
-```
+### Dependencies
+The script requires the following tools:
+- `curl` (for downloading additional scripts dynamically)
+- `yq` (for parsing the YAML configuration file)
 
-## Contributing
+If `yq` is not installed, the script will automatically install it.
 
-Feel free to contribute by submitting issues or pull requests. Let's automate together!
+## Customization
+- Extend the `config.yaml` file to include additional setup parameters such as personal access tokens, repository names, or other configuration options.
+- Add your own setup tasks to the `install.sh` script where indicated.
+
+## License
+This project is licensed under the MIT License.
