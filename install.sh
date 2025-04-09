@@ -41,18 +41,21 @@ fi
 
 # Parse the YAML file using yq (a lightweight YAML processor)
 if ! command -v yq >/dev/null 2>&1; then
-    printProgress " ★ Installing yq (YAML processor)" "CYAN"
+    printProgress " ★ Installing yq (YAML processor)" "$CYAN"
     sudo apt-get install -y yq >/dev/null 2>&1
     printResult 0 $?
+else
+    printProgress " ★ Checking package 'yq'" "CYAN"
+    printResult 0 0
 fi
 
 # Ensure Git is installed
 if ! command -v git >/dev/null 2>&1; then
-    printProgress " ★ Installing Git" "CYAN"
+    printProgress " ★ Installing Git" "$CYAN"
     sudo apt-get install -y git >/dev/null 2>&1
     printResult 0 $?
 else
-    printProgress " ★ Checking Git" "CYAN"
+    printProgress " ★ Checking package 'git'" "CYAN"
     printResult 0 0
 fi
 
@@ -61,7 +64,7 @@ packages=$(yq '.packages[]' "$CONFIG_FILE")
 
 # Install each package listed in the configuration file
 for package in $packages; do
-    printProgress " ★ Installing $package" "CYAN"
+    printProgress " ★ Installing package $package" "$CYAN"
     sudo apt-get install -y "$package" >/dev/null 2>&1
     printResult 0 $?
 done
@@ -72,7 +75,7 @@ repos=$(yq '.repos[]' "$CONFIG_FILE")
 
 if [ -n "$PAT" ] && [ -n "$repos" ]; then
     for repo in $repos; do
-        printProgress " ★ Cloning repository $repo" "CYAN"
+        printProgress " ★ Cloning repository $repo" "$CYAN"
         git clone "https://${PAT}@${repo#https://}" >/dev/null 2>&1
         printResult 0 $?
     done
