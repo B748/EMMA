@@ -63,8 +63,8 @@ function getEssentials {
 getEssentials
 getConfiguration "$1"
 
-printSectionSubHeadline "Welcome to EMMA - Essential Machine Management Automation"
-printSectionSubHeadline "Starting setup"
+printSectionHeadline "Welcome to EMMA v0.0.1 - Essential Machine Management Automation"
+printSectionSubHeadline "Running Setup"
 
 # Ensure Git is installed
 if ! command -v git >/dev/null 2>&1; then
@@ -76,18 +76,21 @@ else
     printResult 0 0
 fi
 
+# CREATES VARIABLES NAMED ACC TO YAML, PREFIXED WITH "CONF_"
+eval "$(parse_yaml "$CONFIG_FILE" "CONF_")"
 
-eval "$(parse_yaml "$CONFIG_FILE")"
+# INSTALL EACH PACKAGE LISTED IN THE CONFIGURATION FILE
+# shellcheck disable=SC2154
+for package in $CONF_packages_; do
+    printProgress " ★ Installing package \"${!package}\"" "$CYAN"
+    sudo apt-get install -y "${!package}" >/dev/null 2>&1
+    printResult 0 $?
+done
 
 ## Read packages from the YAML configuration file
 #packages=$(yq '.packages[]' "$CONFIG_FILE")
 
-## Install each package listed in the configuration file
-#for package in $packages; do
-#    printProgress " ★ Installing package \"$package\"" "$CYAN"
-#    sudo apt-get install -y "$package" >/dev/null 2>&1
-#    printResult 0 $?
-#done
+
 #
 ## Read the PAT and repository URLs from the YAML configuration file
 #PAT=$(yq '.pat' "$CONFIG_FILE")

@@ -17,7 +17,7 @@ function printSectionHeadline {
 function printSectionSubHeadline {
   local text=$1
   local length=${#text}
-  local end=$(((38 - "$length") / 2))
+  local end=$(((24 - "$length") / 2))
   local str="-"
   local range
   range=$(seq $end)
