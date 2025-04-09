@@ -41,16 +41,19 @@ fi
 
 # Parse the YAML file using yq (a lightweight YAML processor)
 if ! command -v yq >/dev/null 2>&1; then
-    printProgress "Installing yq (YAML processor)" "★"
+    printProgress " ★ Installing yq (YAML processor)" "CYAN"
     sudo apt-get install -y yq >/dev/null 2>&1
     printResult 0 $?
 fi
 
 # Ensure Git is installed
 if ! command -v git >/dev/null 2>&1; then
-    printProgress "Installing Git" "★"
+    printProgress " ★ Installing Git" "CYAN"
     sudo apt-get install -y git >/dev/null 2>&1
     printResult 0 $?
+else
+    printProgress " ★ Checking Git" "CYAN"
+    printResult 0 0
 fi
 
 # Read packages from the YAML configuration file
