@@ -24,24 +24,18 @@ CONSTANTS_URL="https://raw.githubusercontent.com/B748/EMMA/main/constants.sh"
 PRINT_PROGRESS_URL="https://raw.githubusercontent.com/B748/EMMA/main/print-progress.sh"
 
 # Fetch and source constants.sh
-printProgress "Loading constants file" "★"
 CONSTANTS_CONTENT=$(curl -sSL "$CONSTANTS_URL")
 if [ -n "$CONSTANTS_CONTENT" ]; then
     eval "$CONSTANTS_CONTENT"
-    printResult 0 $?
 else
-    printResult 1 $?
     exit 1
 fi
 
 # Fetch and source print-progress.sh
-printProgress "Loading print-progress file" "★"
 PRINT_PROGRESS_CONTENT=$(curl -sSL "$PRINT_PROGRESS_URL")
 if [ -n "$PRINT_PROGRESS_CONTENT" ]; then
     eval "$PRINT_PROGRESS_CONTENT"
-    printResult 0 $?
 else
-    printResult 1 $?
     exit 1
 fi
 
@@ -64,7 +58,7 @@ packages=$(yq '.packages[]' "$CONFIG_FILE")
 
 # Install each package listed in the configuration file
 for package in $packages; do
-    printProgress "Installing $package" "★"
+    printProgress " ★ Installing $package" "CYAN"
     sudo apt-get install -y "$package" >/dev/null 2>&1
     printResult 0 $?
 done
@@ -75,7 +69,7 @@ repos=$(yq '.repos[]' "$CONFIG_FILE")
 
 if [ -n "$PAT" ] && [ -n "$repos" ]; then
     for repo in $repos; do
-        printProgress "Cloning repository $repo" "★"
+        printProgress " ★ Cloning repository $repo" "CYAN"
         git clone "https://${PAT}@${repo#https://}" >/dev/null 2>&1
         printResult 0 $?
     done
