@@ -62,4 +62,18 @@ for package in $packages; do
     printResult 0 $?
 done
 
+# Read the PAT and repository URLs from the YAML configuration file
+PAT=$(yq eval '.pat' "$CONFIG_FILE")
+repos=$(yq eval '.repos[]' "$CONFIG_FILE")
+
+if [ -n "$PAT" ] && [ -n "$repos" ]; then
+    for repo in $repos; do
+        printProgress "Cloning repository $repo" "$YELLOW"
+        git clone "https://${PAT}@${repo#https://}" >/dev/null 2>&1
+        printResult 0 $?
+    done
+else
+    echo "No repositories or PAT found in the configuration file."
+fi
+
 echo "Setup complete. Your system is ready!"
