@@ -32,7 +32,22 @@ function printSectionSubHeadline {
 }
 
 function printError {
-  printf "\n%s ⚡ %s%s\n" "$ORANGE" "$1" "$CLEAR"
+    local errorText
+    errorText="$1"
+
+    local lines
+    lines=$("$errorText" | wc -l)
+
+    if [ $lines -eq 0 ]; then
+        printf "\n%s ⚡ %s%s\n" "$ORANGE" "$errorText" "$CLEAR"
+    else
+        printf "\n%s ⚡ %s\n" "$ORANGE" "ERROR MESSAGE:"
+        while IFS= read -r line ;do
+            printf "     %s%s\n"  "$line" "$CLEAR";
+        done <<< "$errorText"
+
+        printf "%s"  "$CLEAR"
+    fi
 }
 
 function printProgress {
