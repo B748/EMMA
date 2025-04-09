@@ -15,19 +15,21 @@ function getEssentials {
     CONSTANTS_URL="$EMMA_URL/imports/constants.sh"
     UI_CODE_URL="$EMMA_URL/imports/ui.sh"
     TOOLS_CODE_URL="$EMMA_URL/imports/tools.sh"
-    YAML_CODE_URL="https://raw.githubusercontent.com/mrbaseman/parse_yaml/blob/master/src/parse_yaml.sh"
+    YAML_CODE_URL="https://raw.githubusercontent.com/mrbaseman/parse_yaml/master/src/parse_yaml.sh"
 
     # FETCH AND READ CONSTANTS
     CONSTANTS_CONTENT=$(curl -sSL "$CONSTANTS_URL")
     if [ -n "$CONSTANTS_CONTENT" ]; then
         eval "$CONSTANTS_CONTENT"
     else
+        echo "Could not dynamically load required dependency \"$CONSTANTS_URL\". Aborting..."
         exit 1
     fi
 
     # FETCH AND READ UI
     UI_CODE_CONTENT=$(curl -sSL "$UI_CODE_URL")
     if [ -n "$UI_CODE_CONTENT" ]; then
+        echo "Could not dynamically load required dependency \"$UI_CODE_URL\". Aborting..."
         eval "$UI_CODE_CONTENT"
     else
         exit 1
@@ -36,6 +38,7 @@ function getEssentials {
     # FETCH AND READ TOOLS
     TOOLS_CODE_CONTENT=$(curl -sSL "$TOOLS_CODE_URL")
     if [ -n "$TOOLS_CODE_CONTENT" ]; then
+        echo "Could not dynamically load required dependency \"$TOOLS_CODE_URL\". Aborting..."
         eval "$TOOLS_CODE_CONTENT"
     else
         exit 1
@@ -47,6 +50,7 @@ function getEssentials {
         # IMPORTS THE FUNCTION "parse_yaml" FROM EXTERNAL REPO
         eval "$YAML_CODE_CONTENT"
     else
+        echo "Could not dynamically load required dependency for yaml parsing. Aborting..."
         exit 1
     fi
 }
