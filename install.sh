@@ -45,7 +45,7 @@ if ! command -v yq >/dev/null 2>&1; then
     sudo apt-get install -y yq >/dev/null 2>&1
     printResult 0 $?
 else
-    printProgress " ★ Checking package 'yq'" "CYAN"
+    printProgress " ★ Checking package 'yq'" "$CYAN"
     printResult 0 0
 fi
 
@@ -55,7 +55,7 @@ if ! command -v git >/dev/null 2>&1; then
     sudo apt-get install -y git >/dev/null 2>&1
     printResult 0 $?
 else
-    printProgress " ★ Checking package 'git'" "CYAN"
+    printProgress " ★ Checking package 'git'" "$CYAN"
     printResult 0 0
 fi
 
