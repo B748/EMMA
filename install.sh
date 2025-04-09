@@ -69,42 +69,37 @@ printSectionSubHeadline "Running Setup"
 
 # Ensure Git is installed
 if ! command -v git >/dev/null 2>&1; then
-    printProgress " ★ Installing package \"git\"" "$CYAN"
+    printProgress " ★ Installing packageVarRef \"git\"" "$CYAN"
     sudo apt-get install -y git >/dev/null 2>&1
     printResult 0 $?
 else
-    printProgress " ★ Checking package \"git\"" "$CYAN"
+    printProgress " ★ Checking packageVarRef \"git\"" "$CYAN"
     printResult 0 0
 fi
+
+CONF_packages_="";
+CONF_repos_="";
 
 # CREATES VARIABLES NAMED ACC TO YAML, PREFIXED WITH "CONF_"
 eval "$(parse_yaml "$CONFIG_FILE" "CONF_")"
 
 # INSTALL EACH PACKAGE LISTED IN THE CONFIGURATION FILE
-# shellcheck disable=SC2154
-for package in $CONF_packages_; do
-    printProgress " ★ Installing package \"${!package}\"" "$CYAN"
-    sudo apt-get install -y "${!package}" >/dev/null 2>&1
+for packageVarRef in $CONF_packages_; do
+    printProgress " ★ Installing packageVarRef \"${!packageVarRef}\"" "$CYAN"
+    sudo apt-get install -y "${!packageVarRef}" >/dev/null 2>&1
     printResult 0 $?
 done
 
-## Read packages from the YAML configuration file
-#packages=$(yq '.packages[]' "$CONFIG_FILE")
-
-
-#
-## Read the PAT and repository URLs from the YAML configuration file
-#PAT=$(yq '.pat' "$CONFIG_FILE")
-#repos=$(yq '.repos[]' "$CONFIG_FILE")
-#
-#if [ -n "$PAT" ] && [ -n "$repos" ]; then
-#    for repo in $repos; do
-#        printProgress " ★ Cloning repository \"$repo\"" "$CYAN"
-#        git clone "https://${PAT}@${repo#https://}" >/dev/null 2>&1
-#        printResult 0 $?
-#    done
-#else
-#    echo "No repositories or PAT found in the configuration file."
-#fi
+# READ THE PAT AND REPOSITORY URLS FROM THE YAML CONFIGURATION FILE
+if [ -n "$CONF_pat" ] && [ -n "$CONF_repos_" ]; then
+    for repoVarRef in $CONF_repos_; do
+        repoUrl=${!repoVarRef}
+        printProgress " ★ Cloning repository \"$repoUrl\"" "$CYAN"
+        git clone "https://${PAT}@${repoUrl#https://}" >/dev/null 2>&1
+        printResult 0 $?
+    done
+else
+    printError "No repositories or PAT found in the configuration file."
+fi
 
 echo "Setup complete. Your system is ready!"
