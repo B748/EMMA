@@ -63,7 +63,8 @@ function getEssentials {
 getEssentials
 getConfiguration "$1"
 
-printSectionHeadline "Welcome to EMMA v0.0.1 - Essential Machine Management Automation"
+printSectionHeadline "Welcome to EMMA v0.0.1"
+printSectionHeadline "Essential Machine Management Automation"
 printSectionSubHeadline "Running Setup"
 
 # Ensure Git is installed
