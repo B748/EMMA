@@ -60,7 +60,7 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 # Read packages from the YAML configuration file
-packages=$(yq eval '.packages[]' "$CONFIG_FILE")
+packages=$(yq '.packages[]' "$CONFIG_FILE")
 
 # Install each package listed in the configuration file
 for package in $packages; do
@@ -70,8 +70,8 @@ for package in $packages; do
 done
 
 # Read the PAT and repository URLs from the YAML configuration file
-PAT=$(yq eval '.pat' "$CONFIG_FILE")
-repos=$(yq eval '.repos[]' "$CONFIG_FILE")
+PAT=$(yq '.pat' "$CONFIG_FILE")
+repos=$(yq '.repos[]' "$CONFIG_FILE")
 
 if [ -n "$PAT" ] && [ -n "$repos" ]; then
     for repo in $repos; do
