@@ -7,11 +7,11 @@ function printSectionHeadline {
   local str="═"
   local range
   range=$(seq $end)
-  printf "\n\n%s            " "$LIME_YELLOW"
+  printf "%s            " "$POWDER_BLUE"
   for i in $range; do echo -n "${str}"; done
   printf " %s " "$text"
   for i in $range; do echo -n "${str}"; done
-  printf "\n\n%s" "$CLEAR"
+  printf "%s\n" "$CLEAR"
 }
 
 function printSectionSubHeadline {
@@ -22,9 +22,9 @@ function printSectionSubHeadline {
   local range
   range=$(seq $end)
 
-  printf "\033[1A"
+  # printf "\033[1A"
 
-  printf "%s            " "$LIME_YELLOW"
+  printf "\n%s            " "$POWDER_BLUE"
   for i in $range; do echo -n "${str}"; done
   printf " %s " "$text"
   for i in $range; do echo -n "${str}"; done
@@ -36,17 +36,17 @@ function printError {
     errorText="$1"
 
     local lines
-    lines=$("$errorText" | wc -l)
+    lines=$(wc -l <<< "${errorText}")
 
-    if [ $lines -eq 0 ]; then
-        printf "\n%s ⚡ %s%s\n" "$ORANGE" "$errorText" "$CLEAR"
+    if [ "$lines" -eq 0 ]; then
+        printf "%s ⚡ %s%s\n" "$ORANGE" "$errorText" "$CLEAR"
     else
-        printf "\n%s ⚡ %s\n" "$ORANGE" "ERROR MESSAGE:"
-        while IFS= read -r line ;do
-            printf "     %s%s\n"  "$line" "$CLEAR";
+        printf "%s ⚡ %s%s%s\n" "$ORANGE" "$UNDERLINE" "ERROR MESSAGE:" "$CLEAR"
+        while IFS= read -r line ; do
+            printf "%s     %s\n" "$ORANGE" "$line";
         done <<< "$errorText"
 
-        printf "%s"  "$CLEAR"
+        printf "%s\n"  "$CLEAR"
     fi
 }
 

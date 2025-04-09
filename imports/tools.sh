@@ -31,10 +31,14 @@ function installRepo {
         printSectionSubHeadline "Installing \"$repoName\""
 
         printProgress " ★ Cloning repository \"$repoFileName\"" "$CYAN"
-        if ! git clone "https://${pat}@${repoUrl#https://}" >/dev/null 2>&1 ; then
-            printResult 0 1
-        else
-            printResult 0 0
+
+        resultText=$(git clone "https://${pat}@${repoUrl#https://}" 2>&1) 1>/dev/null
+        result=$?
+
+        printResult 0 $result
+
+        if [ "$result" -ne 0 ]; then
+            printError "$resultText"
         fi
 
         # CREATES VARIABLES NAMED ACC TO YAML, PREFIXED WITH "CONF_"
