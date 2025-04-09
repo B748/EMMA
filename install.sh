@@ -55,11 +55,11 @@ function getEssentials {
     fi
 }
 
-printSectionSubHeadline "Welcome to EMMA - Essential Machine Management Automation"
-printSectionSubHeadline "Starting setup"
-
 getEssentials
 getConfiguration "$1"
+
+printSectionSubHeadline "Welcome to EMMA - Essential Machine Management Automation"
+printSectionSubHeadline "Starting setup"
 
 # Ensure Git is installed
 if ! command -v git >/dev/null 2>&1; then
