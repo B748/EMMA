@@ -1,0 +1,10 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+/.idea
+
+# All config files
+/*.yaml
+
+# All tmp files
+/_tmp

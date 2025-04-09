@@ -1,10 +1,15 @@
 #!/bin/bash
 
+################################################################################
+#
+# source: https://github.com/B748/EMMA.git
+#
+################################################################################
+#
 # EMMA: Essential Machine Management Automation
-# A simple script to demonstrate automation on Unix-based systems.
-
-echo "Welcome to EMMA - Essential Machine Management Automation"
-echo "Starting setup..."
+# A script for installation automation on Unix-based systems.
+#
+################################################################################
 
 # Check if a configuration file is provided as an argument
 CONFIG_FILE="$1"
@@ -20,8 +25,9 @@ if [ ! -f "$CONFIG_FILE" ]; then
 fi
 
 # Define URLs for required files
-CONSTANTS_URL="https://raw.githubusercontent.com/B748/EMMA/main/constants.sh"
-PRINT_PROGRESS_URL="https://raw.githubusercontent.com/B748/EMMA/main/print-progress.sh"
+EMMA_URL="https://raw.githubusercontent.com/B748/EMMA/main"
+CONSTANTS_URL="$EMMA_URL/imports/constants.sh"
+UI_CODE_URL="$EMMA_URL/imports/ui.sh"
 
 # Fetch and source constants.sh
 CONSTANTS_CONTENT=$(curl -sSL "$CONSTANTS_URL")
@@ -31,13 +37,17 @@ else
     exit 1
 fi
 
-# Fetch and source print-progress.sh
-PRINT_PROGRESS_CONTENT=$(curl -sSL "$PRINT_PROGRESS_URL")
-if [ -n "$PRINT_PROGRESS_CONTENT" ]; then
-    eval "$PRINT_PROGRESS_CONTENT"
+# Fetch and source ui.sh
+UI_CODE_CONTENT=$(curl -sSL "$UI_CODE_URL")
+if [ -n "$UI_CODE_CONTENT" ]; then
+    eval "$UI_CODE_CONTENT"
 else
     exit 1
 fi
+
+printSectionHeadline "Welcome to EMMA - Essential Machine Management Automation"
+printSectionSubHeadline "Starting setup"
+
 
 # Parse the YAML file using yq (a lightweight YAML processor)
 if ! command -v yq >/dev/null 2>&1; then
