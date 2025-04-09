@@ -1,7 +1,7 @@
 # EMMA - Essential Machine Management Automation
 
 ## Overview
-EMMA is a lightweight Bash-based automation script designed to simplify system setup tasks on Unix-based systems. It uses a configuration file to define the list of packages and other setup parameters.
+EMMA is a lightweight Bash-based automation script designed to simplify system setup tasks on Unix-based systems. It uses a YAML configuration file to define the list of packages, a personal access token (PAT), and private repository URLs for cloning.
 
 ## Usage
 
@@ -45,21 +45,39 @@ packages:
   - docker.io
   - git
 
-# Additional configuration options (future use)
-# pat: "your_personal_access_token"
-# repos:
-#   - "repo-name-1"
-#   - "repo-name-2"
+# Personal Access Token (PAT) for accessing private repositories
+pat: "your_personal_access_token_here"
+
+# Private repository URLs to clone
+repos:
+  - "https://github.com/example/private-repo.git"
 ```
+
+### How the Script Uses `config.yaml`
+1. **Install Packages**:
+   The script reads the `packages` section and installs the listed packages using `apt-get`.
+
+2. **Clone Private Repositories**:
+   - The script uses the `pat` (Personal Access Token) from the configuration file to authenticate and clone private repositories listed in the `repos` section.
+   - For example, the repository URL:
+     ```
+     https://github.com/example/private-repo.git
+     ```
+     will be converted to:
+     ```
+     https://your_personal_access_token_here@github.com/example/private-repo.git
+     ```
+     This allows the script to authenticate and clone the repository.
 
 ### Dependencies
 The script requires the following tools:
 - `curl` (for downloading additional scripts dynamically)
 - `yq` (for parsing the YAML configuration file)
+- `git` (for cloning repositories)
 
-If `yq` is not installed, the script will automatically install it.
+If any dependencies are missing, the script will attempt to install them automatically.
 
-## Customization
+### Customization
 - Extend the `config.yaml` file to include additional setup parameters such as personal access tokens, repository names, or other configuration options.
 - Add your own setup tasks to the `install.sh` script where indicated.
 
