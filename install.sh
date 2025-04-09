@@ -6,52 +6,60 @@
 echo "Welcome to EMMA - Essential Machine Management Automation"
 echo "Starting setup..."
 
+# Check if a configuration file is provided as an argument
+CONFIG_FILE="$1"
+
+if [ -z "$CONFIG_FILE" ]; then
+    CONFIG_FILE="config.yaml"
+    echo "No configuration file provided. Using default: $CONFIG_FILE"
+fi
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Error: Configuration file '$CONFIG_FILE' not found."
+    exit 1
+fi
+
 # Define URLs for required files
 CONSTANTS_URL="https://raw.githubusercontent.com/B748/EMMA/main/constants.sh"
 PRINT_PROGRESS_URL="https://raw.githubusercontent.com/B748/EMMA/main/print-progress.sh"
 
-# Define file names
-CONSTANTS_FILE="constants.sh"
-PRINT_PROGRESS_FILE="print-progress.sh"
-
-# Download constants.sh
-echo "Downloading constants file..."
-curl -sSL -o "$CONSTANTS_FILE" "$CONSTANTS_URL"
-if [ -f "$CONSTANTS_FILE" ]; then
-    echo "Constants file downloaded successfully."
+# Fetch and source constants.sh
+echo "Loading constants file..."
+CONSTANTS_CONTENT=$(curl -sSL "$CONSTANTS_URL")
+if [ -n "$CONSTANTS_CONTENT" ]; then
+    eval "$CONSTANTS_CONTENT"
+    echo "Constants loaded successfully."
 else
-    echo "Failed to download constants file."
+    echo "Failed to load constants file."
     exit 1
 fi
 
-# Download print-progress.sh
-echo "Downloading print-progress file..."
-curl -sSL -o "$PRINT_PROGRESS_FILE" "$PRINT_PROGRESS_URL"
-if [ -f "$PRINT_PROGRESS_FILE" ]; then
-    echo "Print-progress file downloaded successfully."
+# Fetch and source print-progress.sh
+echo "Loading print-progress file..."
+PRINT_PROGRESS_CONTENT=$(curl -sSL "$PRINT_PROGRESS_URL")
+if [ -n "$PRINT_PROGRESS_CONTENT" ]; then
+    eval "$PRINT_PROGRESS_CONTENT"
+    echo "Print-progress functions loaded successfully."
 else
-    echo "Failed to download print-progress file."
+    echo "Failed to load print-progress file."
     exit 1
 fi
 
-# Source the downloaded scripts
-source "$CONSTANTS_FILE"
-source "$PRINT_PROGRESS_FILE"
+# Parse the YAML file using yq (a lightweight YAML processor)
+if ! command -v yq >/dev/null 2>&1; then
+    printProgress "Installing yq (YAML processor)" "$YELLOW"
+    sudo apt-get install -y yq >/dev/null 2>&1
+    printResult 0 $?
+fi
 
-# Update the system
-printProgress "Updating package lists" "$YELLOW"
-sudo apt-get update -y >/dev/null 2>&1
-printResult 0 $?
+# Read packages from the YAML configuration file
+packages=$(yq eval '.packages[]' "$CONFIG_FILE")
 
-# Install basic tools
-printProgress "Installing essential tools" "$YELLOW"
-sudo apt-get install -y curl wget git >/dev/null 2>&1
-printResult 0 $?
+# Install each package listed in the configuration file
+for package in $packages; do
+    printProgress "Installing $package" "$YELLOW"
+    sudo apt-get install -y "$package" >/dev/null 2>&1
+    printResult 0 $?
+done
 
 echo "Setup complete. Your system is ready!"
-
-# Add your custom setup tasks below
-# For example:
-# printProgress "Installing Docker" "$YELLOW"
-# sudo apt-get install -y docker.io >/dev/null 2>&1
-# printResult 0 $?
