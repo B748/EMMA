@@ -7,6 +7,9 @@
 #
 ################################################################################
 
+trap "exit 1" TERM
+export TOP_PID=$$
+
 function getEssentials {
     # DEFINE MAIN URL FOR EMMA REPO
     EMMA_URL="https://raw.githubusercontent.com/B748/EMMA/main"
@@ -23,24 +26,24 @@ function getEssentials {
         eval "$CONSTANTS_CONTENT"
     else
         echo "Could not dynamically load required dependency \"$CONSTANTS_URL\". Aborting..."
-        exit 1
+        kill -s TERM $TOP_PID
     fi
 
     # FETCH AND READ UI
     UI_CODE_CONTENT=$(curl -sSL "$UI_CODE_URL")
     if [ -n "$UI_CODE_CONTENT" ]; then
-        echo "Could not dynamically load required dependency \"$UI_CODE_URL\". Aborting..."
         eval "$UI_CODE_CONTENT"
     else
-        exit 1
+        echo "Could not dynamically load required dependency \"$UI_CODE_URL\". Aborting..."
+        kill -s TERM $TOP_PID
     fi
 
     # FETCH AND READ TOOLS
     TOOLS_CODE_CONTENT=$(curl -sSL "$TOOLS_CODE_URL")
     if [ -n "$TOOLS_CODE_CONTENT" ]; then
-        echo "Could not dynamically load required dependency \"$TOOLS_CODE_URL\". Aborting..."
         eval "$TOOLS_CODE_CONTENT"
     else
+        echo "Could not dynamically load required dependency \"$TOOLS_CODE_URL\". Aborting..."
         exit 1
     fi
 
