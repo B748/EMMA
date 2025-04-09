@@ -16,3 +16,31 @@ function getConfiguration {
 
   printResult 0 0
 }
+
+function installRepo {
+    if [ -n "$repoUrl" ] ; then
+        local pat=$1
+        local repoUrl=$2
+
+        local repoFileName
+        repoFileName=$(eval basename "$repoUrl")
+
+        local repoName
+        repoName=${repoFileName%.git}
+
+        printSectionSubHeadline "Installing \"$repoName\""
+
+        printProgress " ★ Cloning repository \"$repoFileName\"" "$CYAN"
+        if ! git clone "https://${pat}@${repoUrl#https://}" >/dev/null 2>&1 ; then
+            printResult 0 1
+        else
+            printResult 0 0
+        fi
+
+        # CREATES VARIABLES NAMED ACC TO YAML, PREFIXED WITH "CONF_"
+#            eval "$(parse_yaml "$CONFIG_FILE" "CONF_")"
+    else
+        printError "Repository not found."
+    fi
+
+}
