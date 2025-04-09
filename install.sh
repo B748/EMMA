@@ -82,7 +82,7 @@ function getEssentials {
     fi
 }
 
-getEssentialsDebug
+getEssentials
 
 printSectionHeadline "Welcome to EMMA v0.0.1"
 printSectionHeadline "Essential Machine Management Automation"
