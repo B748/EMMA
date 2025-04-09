@@ -11,6 +11,8 @@ trap "exit 1" TERM
 export TOP_PID=$$
 
 function getEssentials {
+    clear
+
     # DEFINE MAIN URL FOR EMMA REPO
     EMMA_URL="https://raw.githubusercontent.com/B748/EMMA/main"
 
@@ -74,28 +76,31 @@ else
     printResult 0 0
 fi
 
-# Read packages from the YAML configuration file
-packages=$(yq '.packages[]' "$CONFIG_FILE")
 
-# Install each package listed in the configuration file
-for package in $packages; do
-    printProgress " ★ Installing package \"$package\"" "$CYAN"
-    sudo apt-get install -y "$package" >/dev/null 2>&1
-    printResult 0 $?
-done
+eval "$(parse_yaml "$CONFIG_FILE")"
 
-# Read the PAT and repository URLs from the YAML configuration file
-PAT=$(yq '.pat' "$CONFIG_FILE")
-repos=$(yq '.repos[]' "$CONFIG_FILE")
+## Read packages from the YAML configuration file
+#packages=$(yq '.packages[]' "$CONFIG_FILE")
 
-if [ -n "$PAT" ] && [ -n "$repos" ]; then
-    for repo in $repos; do
-        printProgress " ★ Cloning repository \"$repo\"" "$CYAN"
-        git clone "https://${PAT}@${repo#https://}" >/dev/null 2>&1
-        printResult 0 $?
-    done
-else
-    echo "No repositories or PAT found in the configuration file."
-fi
+## Install each package listed in the configuration file
+#for package in $packages; do
+#    printProgress " ★ Installing package \"$package\"" "$CYAN"
+#    sudo apt-get install -y "$package" >/dev/null 2>&1
+#    printResult 0 $?
+#done
+#
+## Read the PAT and repository URLs from the YAML configuration file
+#PAT=$(yq '.pat' "$CONFIG_FILE")
+#repos=$(yq '.repos[]' "$CONFIG_FILE")
+#
+#if [ -n "$PAT" ] && [ -n "$repos" ]; then
+#    for repo in $repos; do
+#        printProgress " ★ Cloning repository \"$repo\"" "$CYAN"
+#        git clone "https://${PAT}@${repo#https://}" >/dev/null 2>&1
+#        printResult 0 $?
+#    done
+#else
+#    echo "No repositories or PAT found in the configuration file."
+#fi
 
 echo "Setup complete. Your system is ready!"
