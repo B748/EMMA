@@ -25,6 +25,16 @@ You can run the script with or without specifying a configuration file:
    Error: Configuration file 'config.yaml' not found.
    ```
 
+4. **One-liner Execution (Optional Config File):**
+   You can execute the script directly from the repository using `curl`. Optionally, specify a custom configuration file name:
+   ```bash
+   curl -sSL https://raw.githubusercontent.com/B748/EMMA/main/install.sh | bash -s -- my-config.yaml
+   ```
+   If no custom file is specified, the script will default to `config.yaml`:
+   ```bash
+   curl -sSL https://raw.githubusercontent.com/B748/EMMA/main/install.sh | bash
+   ```
+
 ### Configuration File (`config.yaml`)
 The configuration file must be written in YAML format. It can include the following sections:
 
