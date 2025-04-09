@@ -1,29 +1,4 @@
-# BASIC I/O FUNCTIONS
-function printProgress {
-  local text=$1
-  local start=${#text}
-  local end=60
-  local str="."
-  local range
-  range=$(seq "$start" $end)
-  printf "%s%s" "$2" "$text"
-  for i in $range; do echo -n "${str}"; done
-}
-
-function printResult {
-  local okVal=$1
-  local returnVal=$2
-  local okReturn=$3
-  local failReturn=$4
-
-  if [ "$returnVal" -eq "$okVal" ]; then
-    printf "%s%s%s\n" "$GREEN" "${okReturn:-"DONE"}" "$CLEAR"
-  else
-    printf "%s%s%s\n" "$RED" "${failReturn:-"FAIL"}" "$CLEAR"
-  fi
-
-  return "$returnVal"
-}
+# BASIC GUI FUNCTIONS
 
 function printSectionHeadline {
   local text=$1
@@ -54,4 +29,34 @@ function printSectionSubHeadline {
   printf " %s " "$text"
   for i in $range; do echo -n "${str}"; done
   printf "\n\n%s" "$CLEAR"
+}
+
+function printError {
+  printf "\n%s ⚡ %s%s\n" "$ORANGE" "$1" "$CLEAR"
+}
+
+function printProgress {
+  local text=$1
+  local start=${#text}
+  local end=60
+  local str="."
+  local range
+  range=$(seq "$start" $end)
+  printf "%s%s" "$2" "$text"
+  for i in $range; do echo -n "${str}"; done
+}
+
+function printResult {
+  local okVal=$1
+  local returnVal=$2
+  local okReturn=$3
+  local failReturn=$4
+
+  if [ "$returnVal" -eq "$okVal" ]; then
+    printf "%s%s%s\n" "$GREEN" "${okReturn:-"DONE"}" "$CLEAR"
+  else
+    printf "%s%s%s\n" "$RED" "${failReturn:-"FAIL"}" "$CLEAR"
+  fi
+
+  return "$returnVal"
 }

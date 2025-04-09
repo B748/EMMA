@@ -2,62 +2,60 @@
 
 ################################################################################
 #
-# source: https://github.com/B748/EMMA.git
-#
-################################################################################
-#
-# EMMA: Essential Machine Management Automation
-# A script for installation automation on Unix-based systems.
+#      EMMA: ESSENTIAL MACHINE MANAGEMENT AUTOMATION
+#      A SCRIPT FOR INSTALLATION AUTOMATION ON UNIX-BASED SYSTEMS.
 #
 ################################################################################
 
-# Check if a configuration file is provided as an argument
-CONFIG_FILE="$1"
+function getEssentials {
+    # DEFINE MAIN URL FOR EMMA REPO
+    EMMA_URL="https://raw.githubusercontent.com/B748/EMMA/main"
 
-if [ -z "$CONFIG_FILE" ]; then
-    CONFIG_FILE="config.yaml"
-    echo "No configuration file provided. Using default: $CONFIG_FILE"
-fi
+    # DEFINE URLS FOR REQUIRED FILES
+    CONSTANTS_URL="$EMMA_URL/imports/constants.sh"
+    UI_CODE_URL="$EMMA_URL/imports/ui.sh"
+    TOOLS_CODE_URL="$EMMA_URL/imports/tools.sh"
+    YAML_CODE_URL="https://raw.githubusercontent.com/mrbaseman/parse_yaml/blob/master/src/parse_yaml.sh"
 
-if [ ! -f "$CONFIG_FILE" ]; then
-    echo "Error: Configuration file '$CONFIG_FILE' not found."
-    exit 1
-fi
+    # FETCH AND READ CONSTANTS
+    CONSTANTS_CONTENT=$(curl -sSL "$CONSTANTS_URL")
+    if [ -n "$CONSTANTS_CONTENT" ]; then
+        eval "$CONSTANTS_CONTENT"
+    else
+        exit 1
+    fi
 
-# Define URLs for required files
-EMMA_URL="https://raw.githubusercontent.com/B748/EMMA/main"
-CONSTANTS_URL="$EMMA_URL/imports/constants.sh"
-UI_CODE_URL="$EMMA_URL/imports/ui.sh"
+    # FETCH AND READ UI
+    UI_CODE_CONTENT=$(curl -sSL "$UI_CODE_URL")
+    if [ -n "$UI_CODE_CONTENT" ]; then
+        eval "$UI_CODE_CONTENT"
+    else
+        exit 1
+    fi
 
-# Fetch and source constants.sh
-CONSTANTS_CONTENT=$(curl -sSL "$CONSTANTS_URL")
-if [ -n "$CONSTANTS_CONTENT" ]; then
-    eval "$CONSTANTS_CONTENT"
-else
-    exit 1
-fi
+    # FETCH AND READ TOOLS
+    TOOLS_CODE_CONTENT=$(curl -sSL "$TOOLS_CODE_URL")
+    if [ -n "$TOOLS_CODE_CONTENT" ]; then
+        eval "$TOOLS_CODE_CONTENT"
+    else
+        exit 1
+    fi
 
-# Fetch and source ui.sh
-UI_CODE_CONTENT=$(curl -sSL "$UI_CODE_URL")
-if [ -n "$UI_CODE_CONTENT" ]; then
-    eval "$UI_CODE_CONTENT"
-else
-    exit 1
-fi
+    # FETCH AND READ YAML READER CODE
+    YAML_CODE_CONTENT=$(curl -sSL "$YAML_CODE_URL")
+    if [ -n "$YAML_CODE_CONTENT" ]; then
+        # IMPORTS THE FUNCTION "parse_yaml" FROM EXTERNAL REPO
+        eval "$YAML_CODE_CONTENT"
+    else
+        exit 1
+    fi
+}
 
-printSectionHeadline "Welcome to EMMA - Essential Machine Management Automation"
+printSectionSubHeadline "Welcome to EMMA - Essential Machine Management Automation"
 printSectionSubHeadline "Starting setup"
 
-
-# Parse the YAML file using yq (a lightweight YAML processor)
-if ! command -v yq >/dev/null 2>&1; then
-    printProgress " ★ Installing package \"yq\"" "$CYAN"
-    sudo apt-get install -y yq >/dev/null 2>&1
-    printResult 0 $?
-else
-    printProgress " ★ Checking package \"yq\"" "$CYAN"
-    printResult 0 0
-fi
+getEssentials
+getConfiguration "$1"
 
 # Ensure Git is installed
 if ! command -v git >/dev/null 2>&1; then
