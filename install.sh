@@ -1,18 +1,6 @@
 #!/bin/bash
 
-################################################################################
-#
-#      EMMA: ESSENTIAL MACHINE MANAGEMENT AUTOMATION
-#      A SCRIPT FOR INSTALLATION AUTOMATION ON UNIX-BASED SYSTEMS.
-#
-################################################################################
-
-DIR="${BASH_SOURCE%/*}"
-
-if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-
-trap "exit 1" TERM
-export TOP_PID=$$
+############################## ESSENTIAL HOT LOAD FUNCTIONS ###################
 
 function getEssentialsDebug {
     clear
@@ -86,6 +74,18 @@ function getEssentials {
     fi
 }
 
+############################## GENERAL VARIABLE SETUP #########################
+
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+
+EMMA_CONFIG_PATH=$1
+
+trap "exit 1" TERM
+export TOP_PID=$$
+
+############################## START SCRIPT ###################################
+
 # FOR PRODUCTION
 getEssentials
 
@@ -96,7 +96,7 @@ printHeader "Welcome to EMMA v0.0.1\nEssential Machine Management Automation"
 
 printSection "INSTALLING PREREQUISITES"
 
-prepareSystem "$1"
+prepareSystem "$EMMA_CONFIG_PATH"
 
 setSectionEnd
 
