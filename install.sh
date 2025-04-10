@@ -86,11 +86,11 @@ function getEssentials {
     fi
 }
 
-# SWITCH FOR PRODUCTION
-#getEssentials
-getEssentialsDebug
+# FOR PRODUCTION
+getEssentials
 
-
+# FOR DEBUG
+#getEssentialsDebug
 
 printHeader "Welcome to EMMA v0.0.1\nEssential Machine Management Automation"
 
