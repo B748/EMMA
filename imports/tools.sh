@@ -5,16 +5,16 @@ function prepareSystem {
 
     printProgress "Reading configuration file" "$CYAN"
     if [ -z "$CONFIG_FILE" ]; then
-        CONFIG_FILE="config.yaml"
+        CONFIG_FILE="$DIR/config.yaml"
     fi
 
-    if [ ! -f "$DIR/$CONFIG_FILE" ]; then
+    if [ ! -f "$CONFIG_FILE" ]; then
         printResult 0 1
         printError "Configuration file \"$CONFIG_FILE\" not found."
         exit 1
     else
         # CREATES VARIABLES NAMED ACCORDING YAML, PREFIXED WITH "CONF_"
-        eval "$(parse_yaml "$DIR/$CONFIG_FILE" "CONF_")"
+        eval "$(parse_yaml "$CONFIG_FILE" "CONF_")"
         printResult 0 0
     fi
 
