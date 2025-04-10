@@ -7,15 +7,19 @@
 #
 ################################################################################
 
+DIR="${BASH_SOURCE%/*}"
+
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+
 trap "exit 1" TERM
 export TOP_PID=$$
 
 function getEssentialsDebug {
     clear
 
-    source "imports/constants.sh"
-    source "imports/tools.sh"
-    source "imports/ui.sh"
+    source "$DIR/imports/constants.sh"
+    source "$DIR/imports/tools.sh"
+    source "$DIR/imports/ui.sh"
 
     local YAML_CODE_URL="https://raw.githubusercontent.com/mrbaseman/parse_yaml/master/src/parse_yaml.sh"
 
@@ -82,56 +86,27 @@ function getEssentials {
     fi
 }
 
-getEssentials
+# SWITCH FOR PRODUCTION
+#getEssentials
+getEssentialsDebug
 
-printSectionHeadline "Welcome to EMMA v0.0.1"
-printSectionHeadline "Essential Machine Management Automation"
-printSectionSubHeadline "Running Setup"
 
-getConfiguration "$1"
 
-# Ensure Git is installed
-if ! command -v git >/dev/null 2>&1; then
-    printProgress " ★ Installing package \"git\"" "$CYAN"
-    sudo apt-get install -y git >/dev/null 2>&1
-    printResult 0 $?
-else
-    printProgress " ★ Checking package \"git\"" "$CYAN"
-    printResult 0 0
-fi
+printHeader "Welcome to EMMA v0.0.1\nEssential Machine Management Automation"
 
-CONF_packages_="";
-CONF_repos_="";
+printSection "INSTALLING PREREQUISITES"
 
-# CREATES VARIABLES NAMED ACC TO YAML, PREFIXED WITH "CONF_"
-eval "$(parse_yaml "$CONFIG_FILE" "CONF_")"
+prepareSystem "$1"
 
-printSectionSubHeadline "Installing Packages"
+setSectionEnd
 
-# INSTALL EACH PACKAGE LISTED IN THE CONFIGURATION FILE
-for packageVarRef in $CONF_packages_; do
-    printProgress " ★ Installing package \"${!packageVarRef}\"" "$CYAN"
+printEmptyLine
 
-    resultText=$(sudo apt-get install -y "${!packageVarRef}" 2>&1) 1>/dev/null
-    result=$?
+for repoVarRef in $CONF_repos_; do
+    repoPatVar=${repoVarRef}__pat
+    repoUrlVar=${repoVarRef}__url
+    repoPat=${!repoPatVar}
+    repoUrl=${!repoUrlVar}
 
-    printResult 0 $result
-
-    if [ "$result" -ne 0 ]; then
-        printError "$resultText"
-    fi
+    installRepo "$repoPat" "$repoUrl"
 done
-
-# READ THE PAT AND REPOSITORY URLS FROM THE YAML CONFIGURATION FILE
-if [ -n "$CONF_pat" ]; then
-    for repoVarRef in $CONF_repos_; do
-        repoUrl=${!repoVarRef}
-
-        installRepo "$CONF_pat" "$repoUrl"
-    done
-else
-    printError "No PAT found in the configuration file."
-fi
-
-
-echo "Setup complete. Your system is ready!"

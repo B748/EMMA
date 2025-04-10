@@ -11,6 +11,7 @@ WHITE=$(tput setaf 7)
 LIME_YELLOW=$(tput setaf 190)
 POWDER_BLUE=$(tput setaf 153)
 ORANGE=$(tput setaf 202)
+BRIGHT_WHITE=$(tput setaf 255)
 
 # Background Colors
 BG_WHITE=$(tput setab 7)
@@ -21,3 +22,6 @@ CLEAR=$(tput sgr0)
 BOLD=$(tput bold)
 REVERSE=$(tput rev)
 UNDERLINE=$(tput smul)
+
+# Line Length
+LINE_LENGTH=80
