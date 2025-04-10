@@ -111,7 +111,7 @@ function installRepo {
             printResult 0 0 "$DOCKER_COMPOSE_VERSION"
 
             printProgress "Running Docker Compose" "$CYAN"
-            RESULT_TEXT=$(sudo docker compose -f "$DOCKER_COMPOSE_FILE_NAME" up --build --detach http-server 2>&1) 1>/dev/null
+            RESULT_TEXT=$(sudo docker compose -f "$DOCKER_COMPOSE_FILE_NAME" up --build --detach 2>&1) 1>/dev/null
             local RESULT=$?
 
             printResult 0 $RESULT
