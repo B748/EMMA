@@ -19,16 +19,10 @@ You can run the script with or without specifying a configuration file:
    ./install.sh
    ```
 
-3. **Error Handling:**
-   If neither a custom file nor `config.yaml` exists, the script will exit with an error:
-   ```
-   Error: Configuration file 'config.yaml' not found.
-   ```
-
-4. **One-liner Execution (Optional Config File):**
+3. **One-liner Execution (Optional Config File):**
    You can execute the script directly from the repository using `curl`. Optionally, specify a custom configuration file name:
    ```bash
-   curl -sSL https://raw.githubusercontent.com/B748/EMMA/main/install.sh | bash -s -- my-config.yaml
+   curl -sSL https://raw.githubusercontent.com/B748/EMMA/main/install.sh | bash -s -- path/to/my-config.yaml
    ```
    If no custom file is specified, the script will default to `config.yaml`:
    ```bash
@@ -72,7 +66,6 @@ repos:
 ### Dependencies
 The script requires the following tools:
 - `curl` (for downloading additional scripts dynamically)
-- `yq` (for parsing the YAML configuration file)
 - `git` (for cloning repositories)
 
 If any dependencies are missing, the script will attempt to install them automatically.
