@@ -42,50 +42,50 @@ function prepareSystem {
 
 function installRepo {
     if [ -n "$2" ] ; then
-        local PAT=$1
-        local REPO_URL=$2
-        local RESULT_TEXT
+        local pat=$1
+        local repoUrl=$2
+        local resultText
 
-        local REPO_FILE_NAME
-        REPO_FILE_NAME=$(eval basename "$REPO_URL")
+        local repoFileName
+        repoFileName=$(eval basename "$repoUrl")
 
-        local REPO_NAME
-        REPO_NAME=${REPO_FILE_NAME%.git}
+        local repoName
+        repoName=${repoFileName%.git}
 
-        printSection "INSTALLING REPOSITORY \"$REPO_NAME\""
+        printSection "INSTALLING REPOSITORY \"$repoName\""
 
         # CLEANUP
         printProgress "Cleaning folders" "$CYAN"
-        RESULT_TEXT=$(sudo rm -rf "${DIR:?}/$REPO_NAME" 2>&1) 1>/dev/null
-        local RESULT=$?
+        resultText=$(sudo rm -rf "${DIR:?}/$repoName" 2>&1) 1>/dev/null
+        local result=$?
 
-        printResult 0 $RESULT
+        printResult 0 $result
 
-        if [ "$RESULT" -ne 0 ]; then
+        if [ "$result" -ne 0 ]; then
             printEmptyLine
-            printError "$RESULT_TEXT"
+            printError "$resultText"
             exit 1
         fi
 
         # REPO CLONING FROM GITHUB
         printProgress "Cloning repository" "$CYAN"
 
-        RESULT_TEXT=$(git clone "https://${PAT}@${REPO_URL#https://}" "$DIR/$REPO_NAME/" 2>&1) 1>/dev/null
-        local RESULT=$?
+        resultText=$(git clone "https://${pat}@${repoUrl#https://}" "$DIR/$repoName/" 2>&1) 1>/dev/null
+        local result=$?
 
-        printResult 0 $RESULT
+        printResult 0 $result
 
-        if [ "$RESULT" -ne 0 ]; then
+        if [ "$result" -ne 0 ]; then
             printEmptyLine
-            printError "$RESULT_TEXT"
+            printError "$resultText"
             exit 1
         fi
 
         # READING REPO'S EMMA-CONFIG-FILE
         printProgress "Reading config-file" "$CYAN"
-        local REPO_CONFIG_FILE_NAME
-        REPO_CONFIG_FILE_NAME=$DIR/$REPO_NAME/_deploy/config.yaml
-        eval "$(parse_yaml "$REPO_CONFIG_FILE_NAME" "REPO_")"
+        local repoConfigFileName
+        repoConfigFileName=$DIR/$repoName/_deploy/config.yaml
+        eval "$(parse_yaml "$repoConfigFileName" "REPO_")"
         printResult 0 $?
 
         # INSTALLING REQUIRED DEPENDENCIES
@@ -98,29 +98,25 @@ function installRepo {
 
 
         # RUNNING DOCKER COMPOSE
-        local DOCKER_COMPOSE_FILE_NAME
-        DOCKER_COMPOSE_FILE_NAME=$DIR/$REPO_NAME/_deploy/compose.yaml
+        local dockerComposeFileName
+        dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
 
-        if [ -e "$DOCKER_COMPOSE_FILE_NAME" ]; then
-            printStep "RUNNING DOCKER COMPOSE"
+        if [ -e "$dockerComposeFileName" ]; then
+            runDockerCompose "$dockerComposeFileName"
 
-            printProgress "Checking Docker Compose version" "$CYAN"
-            local DOCKER_COMPOSE_VERSION
-            DOCKER_COMPOSE_VERSION=$(docker compose version)
-            DOCKER_COMPOSE_VERSION=${DOCKER_COMPOSE_VERSION##* }
-            printResult 0 0 "$DOCKER_COMPOSE_VERSION"
+            printSection "CHECKING DOCKER CONTAINER STATUS"
 
-            printProgress "Running Docker Compose" "$CYAN"
-            RESULT_TEXT=$(sudo docker compose -f "$DOCKER_COMPOSE_FILE_NAME" up --build --detach 2>&1) 1>/dev/null
-            local RESULT=$?
+            # READING DOCKER COMPOSE
+            printProgress "Reading config-file" "$CYAN"
+            local dockerComposeFileName
+            dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
+            eval "$(parse_yaml "$dockerComposeFileName" "DOCKER_")"
+            printResult 0 $?
 
-            printResult 0 $RESULT
-
-            if [ "$RESULT" -ne 0 ]; then
-                printEmptyLine
-                printError "$RESULT_TEXT"
-                exit 1
-            fi
+            for serviceVarRef in $DOCKER_services_; do
+                serviceName=${serviceVarRef}
+                checkDockerContainerStatus "${!serviceName}"
+            done
 
             setSectionEnd
         else
@@ -138,15 +134,15 @@ function installPackage {
     PACKAGE=$1
 
     printProgress "Installing \"$PACKAGE\"" "$CYAN"
-    local RESULT_TEXT
-    RESULT_TEXT=$(sudo apt-get install -y "$PACKAGE" 2>&1) 1>/dev/null
-    local RESULT=$?
+    local resultText
+    resultText=$(sudo apt-get install -y "$PACKAGE" 2>&1) 1>/dev/null
+    local result=$?
 
-    printResult 0 $RESULT
+    printResult 0 $result
 
-    if [ "$RESULT" -ne 0 ]; then
+    if [ "$result" -ne 0 ]; then
       printEmptyLine
-      printError "$RESULT_TEXT"
+      printError "$resultText"
       exit 1
     fi
 }
@@ -160,4 +156,40 @@ function listPackages {
 function terminateScript {
     printf "%s 🔥 %s%s\n" "$RED" "INSTALLATION TERMINATED" "$CLEAR"
     kill -s TERM $TOP_PID
+}
+
+function runDockerCompose {
+    local dockerComposeFileName=$1
+
+    printStep "RUNNING DOCKER COMPOSE"
+
+    printProgress "Checking Docker Compose version" "$CYAN"
+    local dockerComposeVersion
+    dockerComposeVersion=$(docker compose version)
+    dockerComposeVersion=${dockerComposeVersion##* }
+    printResult 0 0 "$dockerComposeVersion"
+
+    printProgress "Running Docker Compose" "$CYAN"
+    resultText=$(sudo docker compose -f "$dockerComposeFileName" up --build --detach 2>&1) 1>/dev/null
+    local result=$?
+
+    printResult 0 $result
+
+    if [ "$result" -ne 0 ]; then
+        printEmptyLine
+        printError "$resultText"
+        exit 1
+    fi
+
+    setSectionEnd
+}
+
+function checkDockerContainerStatus {
+    local dockerContainer=$1
+    printProgress "$dockerContainer status"
+    if [ "$( docker container inspect -f '{{.State.Status}}' "$dockerContainer" )" = "running" ]; then
+        printResult 0 0 "RUNNING"
+    else
+        printResult 0 1 "" "STOPPED"
+    fi
 }
