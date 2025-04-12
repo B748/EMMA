@@ -96,7 +96,6 @@ function installRepo {
             installPackage "${!packageName}"
         done
 
-
         # RUNNING DOCKER COMPOSE
         local dockerComposeFileName
         dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
@@ -104,25 +103,26 @@ function installRepo {
         if [ -e "$dockerComposeFileName" ]; then
             runDockerCompose "$dockerComposeFileName"
 
+            printEmptyLine
             printSection "CHECKING DOCKER CONTAINER STATUS"
 
             # READING DOCKER COMPOSE
-            printProgress "Reading config-file" "$CYAN"
+            printProgress "Reading docker-compose file" "$CYAN"
             local dockerComposeFileName
             dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
-            eval "$(parse_yaml "$dockerComposeFileName" "DOCKER_")"
+            tmp=$(yaml "$dockerComposeFileName" "")
             printResult 0 $?
 
-            for serviceVarRef in $DOCKER_services_; do
-                serviceName=${serviceVarRef}
-                checkDockerContainerStatus "${!serviceName}"
+            names="$(jq '.services | keys[]' <<< "$tmp")"
+            for serviceName in $names; do
+                checkDockerContainerStatus "$serviceName"
             done
-
-            setSectionEnd
         else
             printProgress "Checking for Docker Installation Files" "$CYAN"
             printResult 0 0 "NONE"
         fi
+
+        setSectionEnd
 
     else
         printError "Repository not found."
@@ -180,16 +180,23 @@ function runDockerCompose {
         printError "$resultText"
         exit 1
     fi
-
-    setSectionEnd
 }
 
 function checkDockerContainerStatus {
     local dockerContainer=$1
+    dockerContainer="${dockerContainer//\"/}"
     printProgress "$dockerContainer status"
-    if [ "$( docker container inspect -f '{{.State.Status}}' "$dockerContainer" )" = "running" ]; then
+    if [ "$(sudo docker container inspect -f '{{.State.Status}}' "$dockerContainer")" = "running" ]; then
         printResult 0 0 "RUNNING"
     else
         printResult 0 1 "" "STOPPED"
     fi
+}
+
+yaml() {
+    local json
+    json=$(python3 -c "import yaml;print(yaml.safe_load(open('$1'))$2)")
+    json="${json//\'/\"}"
+    json="${json//: None/: null}"
+    echo "$json"
 }
