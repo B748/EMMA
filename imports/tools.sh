@@ -1,21 +1,21 @@
 function prepareSystem {
     # CHECK IF A CONFIGURATION FILE IS PROVIDED AS AN ARGUMENT
-    local CONFIG_FILE
-    CONFIG_FILE="$1"
+    local configFileName
+    configFileName="$1"
 
     printProgress "Reading configuration file" "$CYAN"
-    if [ -z "$CONFIG_FILE" ]; then
-        CONFIG_FILE="$DIR/config.yaml"
+    if [ -z "$configFileName" ]; then
+        configFileName="$DIR/config.yaml"
     fi
 
-    if [ ! -f "$CONFIG_FILE" ]; then
+    if [ ! -f "$configFileName" ]; then
         printResult 0 1
-        printError "Configuration file \"$CONFIG_FILE\" not found."
+        printError "Configuration file \"$configFileName\" not found."
         exit 1
     else
-        # CREATES VARIABLES NAMED ACCORDING YAML, PREFIXED WITH "CONF_"
-        eval "$(parse_yaml "$CONFIG_FILE" "CONF_")"
-        printResult 0 0
+        # READING CONFIG FILE
+        CONFIG_DATA=$(yaml "$configFileName" "")
+        printResult 0 $?
     fi
 
     printProgress "Updating package list" "$CYAN"
@@ -68,9 +68,10 @@ function installRepo {
         fi
 
         # REPO CLONING FROM GITHUB
-        printProgress "Cloning repository" "$CYAN"
+        local url=https://$pat@github.com/$repoUrl
 
-        resultText=$(git clone "https://${pat}@${repoUrl#https://}" "$DIR/$repoName/" 2>&1) 1>/dev/null
+        printProgress "Cloning repository" "$CYAN"
+        resultText=$(git clone "$url" "$DIR/$repoName/" 2>&1) 1>/dev/null
         local result=$?
 
         printResult 0 $result
@@ -103,8 +104,10 @@ function installRepo {
         if [ -e "$dockerComposeFileName" ]; then
             runDockerCompose "$dockerComposeFileName"
 
+            setSectionEnd
             printEmptyLine
-            printSection "CHECKING DOCKER CONTAINER STATUS"
+
+            printSection "CHECKING SETUP"
 
             # READING DOCKER COMPOSE
             printProgress "Reading docker-compose file" "$CYAN"
@@ -112,6 +115,8 @@ function installRepo {
             dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
             tmp=$(yaml "$dockerComposeFileName" "")
             printResult 0 $?
+
+            printStep "CONTAINER STATUS"
 
             names="$(jq '.services | keys[]' <<< "$tmp")"
             for serviceName in $names; do
@@ -185,7 +190,7 @@ function runDockerCompose {
 function checkDockerContainerStatus {
     local dockerContainer=$1
     dockerContainer="${dockerContainer//\"/}"
-    printProgress "$dockerContainer status"
+    printProgress "$dockerContainer"
     if [ "$(sudo docker container inspect -f '{{.State.Status}}' "$dockerContainer")" = "running" ]; then
         printResult 0 0 "RUNNING"
     else

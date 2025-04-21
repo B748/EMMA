@@ -87,10 +87,10 @@ export TOP_PID=$$
 ############################## START SCRIPT ###################################
 
 # FOR PRODUCTION
-getEssentials
+#getEssentials
 
 # FOR DEBUG
-#getEssentialsDebug
+getEssentialsDebug
 
 printHeader "Welcome to EMMA v0.0.1\nEssential Machine Management Automation"
 
@@ -102,11 +102,11 @@ setSectionEnd
 
 printEmptyLine
 
-for repoVarRef in $CONF_repos_; do
-    repoPatVar=${repoVarRef}__pat
-    repoUrlVar=${repoVarRef}__url
-    repoPat=${!repoPatVar}
-    repoUrl=${!repoUrlVar}
+REPOS="$(jq '.repos  | values[]' <<< "$CONFIG_DATA")"
+PAT="$(jq '.pat' <<< "$CONFIG_DATA")"
+PAT=$(sed -e 's/^"//' -e 's/"$//' <<<"$PAT")
 
-    installRepo "$repoPat" "$repoUrl"
+for currentRepoUrl in $REPOS; do
+    currentRepoUrl=$(sed -e 's/^"//' -e 's/"$//' <<<"$currentRepoUrl")
+    installRepo "$PAT" "$currentRepoUrl"
 done
