@@ -70,7 +70,6 @@ function prepareSystem {
 
     if [ ! -p "$senderPipePath" ]; then
         printProgress "Create sender-pipe" "$CYAN"
-        mkdir -p "$pipePath"
         mkfifo "$senderPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
@@ -152,7 +151,7 @@ function installRepo {
         done
 
         # RUNNING DOCKER COMPOSE
-        local dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
+        local dockerComposeFileName=$EMMA_DIR/dist-src/$repoName/_deploy/compose.yaml
 
         if [ -e "$dockerComposeFileName" ]; then
             runDockerCompose "$dockerComposeFileName"
@@ -164,7 +163,7 @@ function installRepo {
 
             # READING DOCKER COMPOSE
             printProgress "Reading docker-compose file" "$CYAN"
-            local dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
+            local dockerComposeFileName=$EMMA_DIR/dist-src/$repoName/_deploy/compose.yaml
             tmp=$(yaml "$dockerComposeFileName" "")
             printResult 0 $?
 
