@@ -56,18 +56,14 @@ function prepareSystem {
     if [ ! -d "$EMMA_DIR" ]; then
         printProgress "Create EMMA main directory" "$CYAN"
         sudo mkdir "$EMMA_DIR" >/dev/null 2>&1
-        printResult 0 $?
-    fi
-
-    if [ -d "$EMMA_DIR" ]; then
-        printProgress "Changing owner" "$CYAN"
         sudo chown -R "$(id -u)":"$(id -g)" "$EMMA_DIR"
         printResult 0 $?
     fi
 
     if [ ! -p "$receiverPipePath" ]; then
         printProgress "Create receiver-pipe" "$CYAN"
-        mkdir "$(dirname "$receiverPipePath")"
+        sudo mkdir "$(dirname "$receiverPipePath")"
+        sudo chown -R "$(id -u)":"$(id -g)" "$receiverPipePath"
         mkfifo -p "$receiverPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
