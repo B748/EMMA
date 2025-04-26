@@ -59,7 +59,7 @@ function prepareSystem {
         printResult 0 $?
     fi
 
-    if [ ! -d "$EMMA_DIR" ]; then
+    if [ -d "$EMMA_DIR" ]; then
         printProgress "Changing owner" "$CYAN"
         sudo chown -R "$(id -u)":"$(id -g)" "$EMMA_DIR"
         printResult 0 $?
