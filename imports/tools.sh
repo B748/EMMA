@@ -67,7 +67,7 @@ function prepareSystem {
     fi
 
     printProgress "Download docker-communication script" "$CYAN"
-    sudo curl -sSL "$receiverScriptUrl" -o "$receiverScriptPath" >/dev/null 2>&1
+    sudo curl -sSL "$receiverScriptUrl" --create-dirs -o "$receiverScriptPath" >/dev/null 2>&1
     printResult 0 $?
 
     printProgress "Make script executable" "$CYAN"
