@@ -76,3 +76,6 @@ If any dependencies are missing, the script will attempt to install them automat
 
 ## License
 This project is licensed under the MIT License.
+
+## Acknowledgements
+https://stackoverflow.com/questions/32163955/how-to-run-shell-script-on-host-from-docker-container
