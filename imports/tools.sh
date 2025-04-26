@@ -61,28 +61,34 @@ function prepareSystem {
     fi
 
     if [ ! -p "$receiverPipePath" ]; then
-        printProgress "Create communication pipe" "$CYAN"
+        printProgress "Create receiver-pipe" "$CYAN"
         sudo mkfifo "$receiverPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
 
-    printProgress "Download docker-communication script" "$CYAN"
+    if [ ! -p "$senderPipePath" ]; then
+        printProgress "Create sender-pipe" "$CYAN"
+        sudo mkfifo "$senderPipePath" >/dev/null 2>&1
+        printResult 0 $?
+    fi
+
+    printProgress "Download processing-script" "$CYAN"
     sudo curl -sSL "$receiverScriptUrl" --create-dirs -o "$receiverScriptPath" >/dev/null 2>&1
     printResult 0 $?
 
-    printProgress "Make script executable" "$CYAN"
+    printProgress "Make processing-script executable" "$CYAN"
     sudo chmod +x "$receiverScriptPath" >/dev/null 2>&1
     printResult 0 $?
 
-    printProgress "Make script active on reboot" "$CYAN"
+    printProgress "Make processing-script reboot-proof" "$CYAN"
     crontab -l | grep $receiverScriptPath > /dev/null 2<&1 || (crontab -l 2>/dev/null; echo "@reboot $receiverScriptPath $receiverPipePath") | crontab -
     printResult 0 $?
 
-    printProgress "Stop running script(s)" "$CYAN"
+    printProgress "Stop running processing-script(s)" "$CYAN"
     sudo pkill $receivePipeName
     printResult 0 $?
 
-    printProgress "Run script" "$CYAN"
+    printProgress "Run processing-script" "$CYAN"
     sudo nohup "$receiverScriptPath" "$receiverPipePath" &> /dev/null &
     printResult 0 $?
 }
