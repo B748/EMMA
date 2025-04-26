@@ -3,7 +3,7 @@ function prepareSystem {
     local configFileName
     configFileName="$1"
 
-    printProgress "Reading configuration file" "$CYAN"
+    printProgress "Read configuration file" "$CYAN"
     if [ -z "$configFileName" ]; then
         configFileName="$DIR/config.yaml"
     fi
@@ -18,24 +18,24 @@ function prepareSystem {
         printResult 0 $?
     fi
 
-    printProgress "Updating package list" "$CYAN"
+    printProgress "Update package list" "$CYAN"
     sudo apt-get update >/dev/null 2>&1
     printResult 0 $?
 
-    printProgress "Updating installed packages" "$CYAN"
+    printProgress "Update installed packages" "$CYAN"
     sudo apt-get -y upgrade >/dev/null 2>&1
     printResult 0 $?
 
     # ENSURE GIT IS INSTALLED
     if ! command -v git >/dev/null 2>&1; then
-        printProgress "Installing Git" "$CYAN"
+        printProgress "Install Git" "$CYAN"
         sudo apt-get install -y git >/dev/null 2>&1
         printResult 0 $?
     else
         local GIT_VERSION
         GIT_VERSION=$(git -v)
         GIT_VERSION=${GIT_VERSION##* }
-        printProgress "Checking Git version" "$CYAN"
+        printProgress "Git version" "$CYAN"
         printResult 0 0 "$GIT_VERSION"
     fi
 }
