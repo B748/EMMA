@@ -13,6 +13,9 @@ export TOP_PID=$$
 # DEFINE MAIN URL FOR EMMA REPO
 EMMA_URL="https://raw.githubusercontent.com/B748/EMMA/main"
 
+# DEFINE MAIN APP PATH
+EMMA_DIR="/opt/emma"
+
 ############################## ESSENTIAL HOT LOAD FUNCTIONS ###################
 
 function getEssentialsDebug {

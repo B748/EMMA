@@ -42,9 +42,8 @@ function prepareSystem {
     printStep "CREATING TWO-WAY COMMUNICATION BASE"
 
     # NOMENCLATURE:
-    # DOCKER => CONTAINER = UPLINK (TO SATELLITE)
-    # CONTAINER => DOCKER = DOWNLINK (FROM SATELLITE)
-    local emmaMainDir="/EMMA"
+    # DOCKER => CONTAINER = UPLINK ("TO SATELLITE")
+    # CONTAINER => DOCKER = DOWNLINK ("FROM SATELLITE")
     local sendPipeName="docker-uplink"
     local receivePipeName="docker-downlink"
     local senderPipePath=$EMMA/pipes/$sendPipeName
@@ -52,17 +51,17 @@ function prepareSystem {
 
     local receiverScriptName="downlink-processing.sh"
     local receiverScriptUrl="$EMMA_URL/host/$receiverScriptName"
-    local receiverScriptPath="$emmaMainDir/host/$receiverScriptName"
+    local receiverScriptPath="$EMMA_DIR/host/$receiverScriptName"
 
-    if [ ! -d "$emmaMainDir" ]; then
+    if [ ! -d "$EMMA_DIR" ]; then
         printProgress "Create EMMA main directory" "$CYAN"
-        sudo mkdir "$emmaMainDir" >/dev/null 2>&1
+        sudo mkdir "$EMMA_DIR" >/dev/null 2>&1
         printResult 0 $?
     fi
 
-    if [ ! -d "$emmaMainDir" ]; then
+    if [ ! -d "$EMMA_DIR" ]; then
         printProgress "Changing owner" "$CYAN"
-        sudo chown -R "$(id -u)":"$(id -g)" "$emmaMainDir"
+        sudo chown -R "$(id -u)":"$(id -g)" "$EMMA_DIR"
         printResult 0 $?
     fi
 
@@ -110,8 +109,7 @@ function installRepo {
         local repoFileName
         repoFileName=$(eval basename "$repoUrl")
 
-        local repoName
-        repoName=${repoFileName%.git}
+        local repoName=${repoFileName%.git}
 
         printSection "INSTALLING REPOSITORY \"$repoName\""
 
@@ -132,7 +130,7 @@ function installRepo {
         local url=https://$pat@github.com/$repoUrl
 
         printProgress "Cloning repository" "$CYAN"
-        resultText=$(git clone "$url" "$DIR/$repoName/" 2>&1) 1>/dev/null
+        resultText=$(git clone "$url" "$EMMA_DIR/dist-src/$repoName/" 2>&1) 1>/dev/null
         local result=$?
 
         printResult 0 $result
@@ -145,8 +143,7 @@ function installRepo {
 
         # READING REPO'S EMMA-CONFIG-FILE
         printProgress "Reading config-file" "$CYAN"
-        local repoConfigFileName
-        repoConfigFileName=$DIR/$repoName/_deploy/config.yaml
+        local repoConfigFileName=$EMMA_DIR/dist-src/$repoName/_deploy/config.yaml
         eval "$(parse_yaml "$repoConfigFileName" "REPO_")"
         printResult 0 $?
 
@@ -159,8 +156,7 @@ function installRepo {
         done
 
         # RUNNING DOCKER COMPOSE
-        local dockerComposeFileName
-        dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
+        local dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
 
         if [ -e "$dockerComposeFileName" ]; then
             runDockerCompose "$dockerComposeFileName"
@@ -172,8 +168,7 @@ function installRepo {
 
             # READING DOCKER COMPOSE
             printProgress "Reading docker-compose file" "$CYAN"
-            local dockerComposeFileName
-            dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
+            local dockerComposeFileName=$DIR/$repoName/_deploy/compose.yaml
             tmp=$(yaml "$dockerComposeFileName" "")
             printResult 0 $?
 
