@@ -46,8 +46,9 @@ function prepareSystem {
     # CONTAINER => DOCKER = DOWNLINK ("FROM SATELLITE")
     local sendPipeName="docker-uplink"
     local receivePipeName="docker-downlink"
-    local senderPipePath="$EMMA_DIR/pipes/$sendPipeName"
-    local receiverPipePath="$EMMA_DIR/pipes/$receivePipeName"
+    local pipePath="$EMMA_DIR/pipes"
+    local senderPipePath="$pipePath/$sendPipeName"
+    local receiverPipePath="pipePath/$receivePipeName"
 
     local receiverScriptName="downlink-processing.sh"
     local receiverScriptUrl="$EMMA_URL/host/$receiverScriptName"
@@ -62,14 +63,14 @@ function prepareSystem {
 
     if [ ! -p "$receiverPipePath" ]; then
         printProgress "Create receiver-pipe" "$CYAN"
-        mkdir "$(dirname "$receiverPipePath")"
+        mkdir "$pipePath"
         mkfifo "$receiverPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
 
     if [ ! -p "$senderPipePath" ]; then
         printProgress "Create sender-pipe" "$CYAN"
-        mkdir "$(dirname "$senderPipePath")"
+        mkdir "$pipePath"
         mkfifo "$senderPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
@@ -88,7 +89,7 @@ function prepareSystem {
 
     printProgress "Stop running processing-script(s)" "$CYAN"
     sudo pkill $receivePipeName
-    printResult 0 $?
+    printResult 0 $? "" "NONE FOUND"
 
     printProgress "Run processing-script" "$CYAN"
     nohup "$receiverScriptPath" "$receiverPipePath" &> /dev/null &
