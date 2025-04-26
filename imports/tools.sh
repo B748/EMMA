@@ -48,7 +48,7 @@ function prepareSystem {
     local receivePipeName="docker-downlink"
     local pipePath="$EMMA_DIR/pipes"
     local senderPipePath="$pipePath/$sendPipeName"
-    local receiverPipePath="pipePath/$receivePipeName"
+    local receiverPipePath="$pipePath/$receivePipeName"
 
     local receiverScriptName="downlink-processing.sh"
     local receiverScriptUrl="$EMMA_URL/host/$receiverScriptName"
