@@ -60,20 +60,28 @@ function prepareSystem {
         printResult 0 $?
     fi
 
+    if [ ! -d "$emmaMainDir" ]; then
+        printProgress "Changing owner" "$CYAN"
+        sudo chown -R "$(id -u)":"$(id -g)" "$emmaMainDir"
+        printResult 0 $?
+    fi
+
     if [ ! -p "$receiverPipePath" ]; then
         printProgress "Create receiver-pipe" "$CYAN"
-        sudo mkfifo "$receiverPipePath" >/dev/null 2>&1
+        mkdir "$(dirname "$receiverPipePath")"
+        mkfifo -p "$receiverPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
 
     if [ ! -p "$senderPipePath" ]; then
         printProgress "Create sender-pipe" "$CYAN"
-        sudo mkfifo "$senderPipePath" >/dev/null 2>&1
+        mkdir "$(dirname "$senderPipePath")"
+        mkfifo -p "$senderPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
 
     printProgress "Download processing-script" "$CYAN"
-    sudo curl -sSL "$receiverScriptUrl" --create-dirs -o "$receiverScriptPath" >/dev/null 2>&1
+    curl -sSL "$receiverScriptUrl" --create-dirs -o "$receiverScriptPath" >/dev/null 2>&1
     printResult 0 $?
 
     printProgress "Make processing-script executable" "$CYAN"
@@ -89,7 +97,7 @@ function prepareSystem {
     printResult 0 $?
 
     printProgress "Run processing-script" "$CYAN"
-    sudo nohup "$receiverScriptPath" "$receiverPipePath" &> /dev/null &
+    nohup "$receiverScriptPath" "$receiverPipePath" &> /dev/null &
     printResult 0 $?
 }
 
