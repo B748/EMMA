@@ -63,14 +63,14 @@ function prepareSystem {
 
     if [ ! -p "$receiverPipePath" ]; then
         printProgress "Create receiver-pipe" "$CYAN"
-        mkdir "$pipePath"
+        mkdir -p "$pipePath"
         mkfifo "$receiverPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
 
     if [ ! -p "$senderPipePath" ]; then
         printProgress "Create sender-pipe" "$CYAN"
-        mkdir "$pipePath"
+        mkdir -p "$pipePath"
         mkfifo "$senderPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
@@ -111,7 +111,7 @@ function installRepo {
 
         # CLEANUP
         printProgress "Cleaning folders" "$CYAN"
-        resultText=$(sudo rm -rf "${DIR:?}/$repoName" 2>&1) 1>/dev/null
+        resultText=$(sudo rm -rf "$EMMA_DIR/dist-src/$repoName/" 2>&1) 1>/dev/null
         local result=$?
 
         printResult 0 $result
