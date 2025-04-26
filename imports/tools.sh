@@ -46,8 +46,8 @@ function prepareSystem {
     # CONTAINER => DOCKER = DOWNLINK ("FROM SATELLITE")
     local sendPipeName="docker-uplink"
     local receivePipeName="docker-downlink"
-    local senderPipePath="$EMMA/pipes/$sendPipeName"
-    local receiverPipePath="$EMMA/pipes/$receivePipeName"
+    local senderPipePath="$EMMA_DIR/pipes/$sendPipeName"
+    local receiverPipePath="$EMMA_DIR/pipes/$receivePipeName"
 
     local receiverScriptName="downlink-processing.sh"
     local receiverScriptUrl="$EMMA_URL/host/$receiverScriptName"
@@ -62,16 +62,15 @@ function prepareSystem {
 
     if [ ! -p "$receiverPipePath" ]; then
         printProgress "Create receiver-pipe" "$CYAN"
-        sudo mkdir "$(dirname "$receiverPipePath")"
-        sudo chown -R "$(id -u)":"$(id -g)" "$receiverPipePath"
-        mkfifo -p "$receiverPipePath" >/dev/null 2>&1
+        mkdir "$(dirname "$receiverPipePath")"
+        mkfifo "$receiverPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
 
     if [ ! -p "$senderPipePath" ]; then
         printProgress "Create sender-pipe" "$CYAN"
         mkdir "$(dirname "$senderPipePath")"
-        mkfifo -p "$senderPipePath" >/dev/null 2>&1
+        mkfifo "$senderPipePath" >/dev/null 2>&1
         printResult 0 $?
     fi
 
