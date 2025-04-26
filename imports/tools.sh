@@ -38,6 +38,53 @@ function prepareSystem {
         printProgress "Git version" "$CYAN"
         printResult 0 0 "$GIT_VERSION"
     fi
+
+    printStep "CREATING TWO-WAY COMMUNICATION BASE"
+
+    # NOMENCLATURE:
+    # DOCKER => CONTAINER = UPLINK (TO SATELLITE)
+    # CONTAINER => DOCKER = DOWNLINK (FROM SATELLITE)
+    local emmaMainDir="/EMMA"
+    local sendPipeName="docker-uplink"
+    local receivePipeName="docker-downlink"
+    local senderPipePath=$EMMA/pipes/$sendPipeName
+    local receiverPipePath=$EMMA/pipes/$receivePipeName
+
+    local receiverScriptName="downlink-processing.sh"
+    local receiverScriptUrl="$EMMA_URL/host/$receiverScriptName"
+    local receiverScriptPath="$emmaMainDir/host/$receiverScriptName"
+
+    if [ ! -d "$emmaMainDir" ]; then
+        printProgress "Create EMMA main directory" "$CYAN"
+        sudo mkdir "$emmaMainDir" >/dev/null 2>&1
+        printResult 0 $?
+    fi
+
+    if [ ! -p "$receiverPipePath" ]; then
+        printProgress "Create communication pipe" "$CYAN"
+        sudo mkfifo "$receiverPipePath" >/dev/null 2>&1
+        printResult 0 $?
+    fi
+
+    printProgress "Download docker-communication script" "$CYAN"
+    sudo curl -sSL "$receiverScriptUrl" -o "$receiverScriptPath" >/dev/null 2>&1
+    printResult 0 $?
+
+    printProgress "Make script executable" "$CYAN"
+    sudo chmod +x "$receiverScriptPath" >/dev/null 2>&1
+    printResult 0 $?
+
+    printProgress "Make script active on reboot" "$CYAN"
+    crontab -l | grep $receiverScriptPath > /dev/null 2<&1 || (crontab -l 2>/dev/null; echo "@reboot $receiverScriptPath $receiverPipePath") | crontab -
+    printResult 0 $?
+
+    printProgress "Stop running script(s)" "$CYAN"
+    sudo pkill $receivePipeName
+    printResult 0 $?
+
+    printProgress "Run script" "$CYAN"
+    sudo nohup "$receiverScriptPath" "$receiverPipePath" &> /dev/null &
+    printResult 0 $?
 }
 
 function installRepo {
