@@ -1,5 +1,18 @@
 #!/bin/bash
 
+############################## GENERAL VARIABLE SETUP #########################
+
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+
+EMMA_CONFIG_PATH=$1
+
+trap "exit 1" TERM
+export TOP_PID=$$
+
+# DEFINE MAIN URL FOR EMMA REPO
+EMMA_URL="https://raw.githubusercontent.com/B748/EMMA/main"
+
 ############################## ESSENTIAL HOT LOAD FUNCTIONS ###################
 
 function getEssentialsDebug {
@@ -26,9 +39,6 @@ function getEssentialsDebug {
 
 function getEssentials {
     clear
-
-    # DEFINE MAIN URL FOR EMMA REPO
-    EMMA_URL="https://raw.githubusercontent.com/B748/EMMA/main"
 
     # DEFINE URLS FOR REQUIRED FILES
     CONSTANTS_URL="$EMMA_URL/imports/constants.sh"
@@ -73,16 +83,6 @@ function getEssentials {
         exit 1
     fi
 }
-
-############################## GENERAL VARIABLE SETUP #########################
-
-DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-
-EMMA_CONFIG_PATH=$1
-
-trap "exit 1" TERM
-export TOP_PID=$$
 
 ############################## START SCRIPT ###################################
 
