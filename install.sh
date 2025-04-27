@@ -65,12 +65,10 @@ function getEssentials {
 ############################## START SCRIPT ###################################
 
 # FOR PRODUCTION
-#getEssentials
+getEssentials
 
 # FOR DEBUG
-
 #getEssentialsDebug
-getEssentials
 
 printHeader "Welcome to EMMA v0.0.1\nEssential Machine Management Automation"
 
