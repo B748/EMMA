@@ -14,7 +14,7 @@ function prepareSystem {
         exit 1
     else
         # READING CONFIG FILE
-        CONFIG_DATA=$(yaml "$configFileName" "")
+        CONFIG_DATA=$(yamlToJSON "$configFileName" "")
         printResult 0 $?
     fi
 
@@ -143,9 +143,9 @@ function installRepo {
 
         printProgress "Reading config-file" "$CYAN"
         local repoConfigFileName=$EMMA_DIR/dist-src/$repoName/_deploy/config.yaml
-        repoConfigData="$(yaml "$repoConfigFileName")"
-        requiredRepoPackages="$(jq '.packages  | values[]' <<< "$repoConfigData")"
-        preRunScripts="$(jq '.scripts.pre  | values[]' <<< "$repoConfigData")"
+        repoConfigData="$(yamlToJSON "$repoConfigFileName")"
+        requiredRepoPackages=$(getJSONValue ".packages  | values[]" "$repoConfigData")
+        preRunScripts=$(getJSONValue ".scripts.pre  | values[]" "$repoConfigData")
         printResult 0 $?
 
         # INSTALLING REQUIRED DEPENDENCIES
@@ -177,7 +177,7 @@ function installRepo {
             # READING DOCKER COMPOSE
             printProgress "Reading docker-compose file" "$CYAN"
             local dockerComposeFileName=$EMMA_DIR/dist-src/$repoName/_deploy/compose.yaml
-            tmp=$(yaml "$dockerComposeFileName" "")
+            tmp=$(yamlToJSON "$dockerComposeFileName" "")
             printResult 0 $?
 
             printStep "CONTAINER STATUS"
@@ -262,10 +262,18 @@ function checkDockerContainerStatus {
     fi
 }
 
-yaml() {
+yamlToJSON() {
     local json
     json=$(python3 -c "import yaml;print(yaml.safe_load(open('$1'))$2)")
     json="${json//\'/\"}"
     json="${json//: None/: null}"
     echo "$json"
+}
+
+getJSONValue() {
+    local selection=$1
+    local json=$2
+    local result
+    result="$(jq -r "$selection" <<< "$json")"
+    echo "$result"
 }
