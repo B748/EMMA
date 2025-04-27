@@ -137,17 +137,30 @@ function installRepo {
         fi
 
         # READING REPO'S EMMA-CONFIG-FILE
+        local repoConfigData
+        local requiredRepoPackages
+        local preRunScripts
+
         printProgress "Reading config-file" "$CYAN"
         local repoConfigFileName=$EMMA_DIR/dist-src/$repoName/_deploy/config.yaml
-        eval "$(parse_yaml "$repoConfigFileName" "REPO_")"
+        repoConfigData="$(yaml "$repoConfigFileName")"
+        requiredRepoPackages="$(jq '.packages  | values[]' <<< "$repoConfigData")"
+        preRunScripts="$(jq '.scripts.pre  | values[]' <<< "$repoConfigData")"
         printResult 0 $?
 
         # INSTALLING REQUIRED DEPENDENCIES
         printStep "INSTALLING REQUIRED PACKAGES"
 
-        for packageVarRef in $REPO_packages_; do
-            packageName=${packageVarRef}
-            installPackage "${!packageName}"
+        for packageName in $requiredRepoPackages; do
+            installPackage "$packageName"
+        done
+
+        # RUNNING PRE SCRIPTS
+        printStep "RUNNING PRE-INSTALL SCRIPTS"
+
+        for scriptName in $preRunScripts; do
+            sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
+            bash "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
         done
 
         # RUNNING DOCKER COMPOSE
