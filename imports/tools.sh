@@ -159,8 +159,10 @@ function installRepo {
         printStep "RUNNING PRE-INSTALL SCRIPTS"
 
         for scriptName in $preRunScripts; do
+            printProgress "Executing script \"$scriptName\"" "$CYAN"
             sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
             bash "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
+            printResult 0 $?
         done
 
         # RUNNING DOCKER COMPOSE
