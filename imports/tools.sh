@@ -209,9 +209,9 @@ function installRepo {
 function runScript() {
     local scriptPath=$1
 
-    printProgress "Executing script \"$(basename scriptName .sh)\"" "$CYAN"
+    printProgress "Executing script \"$(basename "$scriptName" .sh)\"" "$CYAN"
     sudo chmod +x "$scriptPath"
-    resultText=$(bash "$scriptPath")
+    resultText=$(bash "$scriptPath" 2>&1) 1>/dev/null
     local result=$?
 
     printResult 0 $result
