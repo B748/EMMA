@@ -140,12 +140,14 @@ function installRepo {
         local repoConfigData
         local requiredRepoPackages
         local preRunScripts
+        local postRunScripts
 
         printProgress "Reading config-file" "$CYAN"
         local repoConfigFileName=$EMMA_DIR/dist-src/$repoName/_deploy/emma.yaml
         repoConfigData="$(yamlToJSON "$repoConfigFileName")"
         requiredRepoPackages=$(getJSONValue ".packages  | values[]" "$repoConfigData")
         preRunScripts=$(getJSONValue ".scripts.pre  | values[]" "$repoConfigData")
+        postRunScripts=$(getJSONValue ".scripts.post  | values[]" "$repoConfigData")
         printResult 0 $?
 
         # INSTALLING REQUIRED DEPENDENCIES
@@ -160,8 +162,8 @@ function installRepo {
 
         for scriptName in $preRunScripts; do
             printProgress "Executing script \"$scriptName\"" "$CYAN"
-            sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
-            bash "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
+            sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/scripts/$scriptName"
+            bash "$EMMA_DIR/dist-src/$repoName/_deploy/scripts/$scriptName"
             printResult 0 $?
         done
 
@@ -187,6 +189,16 @@ function installRepo {
             names="$(jq '.services | keys[]' <<< "$tmp")"
             for serviceName in $names; do
                 checkDockerContainerStatus "$serviceName"
+            done
+
+            # RUNNING POST SCRIPTS
+            printStep "RUNNING POST-INSTALL SCRIPTS"
+
+            for scriptName in $postRunScripts; do
+                printProgress "Executing script \"$scriptName\"" "$CYAN"
+                sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/scripts/$scriptName"
+                bash "$EMMA_DIR/dist-src/$repoName/_deploy/scripts/$scriptName"
+                printResult 0 $?
             done
         else
             printProgress "Checking for Docker Installation Files" "$CYAN"
