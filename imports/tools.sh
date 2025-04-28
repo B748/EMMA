@@ -162,8 +162,8 @@ function installRepo {
 
         for scriptName in $preRunScripts; do
             printProgress "Executing script \"$scriptName\"" "$CYAN"
-            sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/scripts/$scriptName"
-            bash "$EMMA_DIR/dist-src/$repoName/_deploy/scripts/$scriptName"
+            sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
+            bash "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
             printResult 0 $?
         done
 
@@ -196,8 +196,9 @@ function installRepo {
 
             for scriptName in $postRunScripts; do
                 printProgress "Executing script \"$scriptName\"" "$CYAN"
-                sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/scripts/$scriptName"
-                bash "$EMMA_DIR/dist-src/$repoName/_deploy/scripts/$scriptName"
+                printProgress "Executing script \"$scriptName\"" "$CYAN"
+                sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
+                bash "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
                 printResult 0 $?
             done
         else
