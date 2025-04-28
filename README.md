@@ -8,18 +8,7 @@ EMMA is a lightweight Bash-based automation script designed to simplify system s
 ### Running the Script
 You can run the script with or without specifying a configuration file:
 
-1. **Using a Custom Configuration File:**
-   ```bash
-   ./install.sh my-config.yaml
-   ```
-
-2. **Using the Default Configuration File (`config.yaml`):**
-   If no file is specified, the script will look for a file named `config.yaml` in the current directory:
-   ```bash
-   ./install.sh
-   ```
-
-3. **One-liner Execution (Optional Config File):**
+**One-liner Execution (Optional Config File):**
    You can execute the script directly from the repository using `curl`. Optionally, specify a custom configuration file name:
    ```bash
    curl -sSL https://raw.githubusercontent.com/B748/EMMA/main/install.sh | bash -s -- path/to/my-config.yaml
@@ -29,16 +18,11 @@ You can run the script with or without specifying a configuration file:
    curl -sSL https://raw.githubusercontent.com/B748/EMMA/main/install.sh | bash
    ```
 
-### Configuration File (`config.yaml`)
+### Configuration File (`source.yaml`)
 The configuration file must be written in YAML format. It can include the following sections:
 
-#### Example `config.yaml`:
+#### Example `source.yaml`:
 ```yaml
-# List of packages to install
-packages:
-  - docker.io
-  - git
-
 # Personal Access Token (PAT) for accessing private repositories
 pat: "your_personal_access_token_here"
 
@@ -47,7 +31,7 @@ repos:
   - "https://github.com/example/private-repo.git"
 ```
 
-### How the Script Uses `config.yaml`
+### How the Script Uses `source.yaml`
 1. **Install Packages**:
    The script reads the `packages` section and installs the listed packages using `apt-get`.
 

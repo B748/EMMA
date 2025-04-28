@@ -5,7 +5,7 @@ function prepareSystem {
 
     printProgress "Read configuration file" "$CYAN"
     if [ -z "$configFileName" ]; then
-        configFileName="$DIR/config.yaml"
+        configFileName="$DIR/source.yaml"
     fi
 
     if [ ! -f "$configFileName" ]; then
@@ -142,7 +142,7 @@ function installRepo {
         local preRunScripts
 
         printProgress "Reading config-file" "$CYAN"
-        local repoConfigFileName=$EMMA_DIR/dist-src/$repoName/_deploy/config.yaml
+        local repoConfigFileName=$EMMA_DIR/dist-src/$repoName/_deploy/emma.yaml
         repoConfigData="$(yamlToJSON "$repoConfigFileName")"
         requiredRepoPackages=$(getJSONValue ".packages  | values[]" "$repoConfigData")
         preRunScripts=$(getJSONValue ".scripts.pre  | values[]" "$repoConfigData")
