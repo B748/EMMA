@@ -64,8 +64,6 @@ function printSectionSubHeadline {
   local range
   range=$(seq $end)
 
-  # printf "\033[1A"
-
   printf "\n%s            " "$POWDER_BLUE"
   for i in $range; do echo -n "${str}"; done
   printf " %s " "$text"
@@ -78,7 +76,7 @@ function printEmptyLine {
     lines=$1
     lines=${lines:=1}
 
-    for (( c =1; c<=$lines; c++ )) do printf "\n"; done
+    for (( c =1; c<=lines; c++ )) do printf "\n"; done
 }
 
 function printSection {
@@ -134,7 +132,6 @@ function printProgress {
     printf " %.0s" $(seq $((INDENTATION - 0)))
     printf "%s%s" "$CYAN" "$text"
     printf "$fillerStr%.0s" $(seq $((LINE_LENGTH - start - 1)))
-#    for i in $range; do printf "%s" "$fillerStr"; done
 }
 
 function printResult {

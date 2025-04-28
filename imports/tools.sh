@@ -1,3 +1,5 @@
+# FUNCTIONS LIBRARY
+
 function prepareSystem {
     # CHECK IF A CONFIGURATION FILE IS PROVIDED AS AN ARGUMENT
     local configFileName
@@ -14,6 +16,7 @@ function prepareSystem {
         exit 1
     else
         # READING CONFIG FILE
+        # shellcheck disable=SC2034
         CONFIG_DATA=$(yamlToJSON "$configFileName" "")
         printResult 0 $?
     fi
@@ -32,11 +35,11 @@ function prepareSystem {
         sudo apt-get install -y git >/dev/null 2>&1
         printResult 0 $?
     else
-        local GIT_VERSION
-        GIT_VERSION=$(git -v)
-        GIT_VERSION=${GIT_VERSION##* }
+        local gitVersion
+        gitVersion=$(git -v)
+        gitVersion=${gitVersion##* }
         printProgress "Git version" "$CYAN"
-        printResult 0 0 "$GIT_VERSION"
+        printResult 0 0 "$gitVersion"
     fi
 
     printStep "CREATING TWO-WAY COMMUNICATION BASE"
@@ -83,7 +86,7 @@ function prepareSystem {
     printResult 0 $?
 
     printProgress "Make processing-script reboot-proof" "$CYAN"
-    crontab -l | grep $receiverScriptPath > /dev/null 2<&1 || (crontab -l 2>/dev/null; echo "@reboot $receiverScriptPath $receiverPipePath") | crontab -
+    crontab -l | grep "$receiverScriptPath" > /dev/null 2<&1 || (crontab -l 2>/dev/null; echo "@reboot $receiverScriptPath $receiverPipePath") | crontab -
     printResult 0 $?
 
     printProgress "Stop running processing-script(s)" "$CYAN"
@@ -151,7 +154,7 @@ function installRepo {
         printResult 0 $?
 
         # INSTALLING REQUIRED DEPENDENCIES
-        printStep "INSTALLING REQUIRED PACKAGES"
+        printStep "INSTALLING REQUIRED packageS"
 
         for packageName in $requiredRepoPackages; do
             installPackage "$packageName"
@@ -206,7 +209,7 @@ function installRepo {
     fi
 }
 
-function runScript() {
+function runScript {
     local scriptPath=$1
 
     printProgress "Executing script \"$(basename "$scriptName" .sh)\"" "$CYAN"
@@ -224,12 +227,12 @@ function runScript() {
 }
 
 function installPackage {
-    local PACKAGE
-    PACKAGE=$1
+    local package
+    package=$1
 
-    printProgress "Installing \"$PACKAGE\"" "$CYAN"
+    printProgress "Installing \"$package\"" "$CYAN"
     local resultText
-    resultText=$(sudo apt-get install -y "$PACKAGE" 2>&1) 1>/dev/null
+    resultText=$(sudo apt-get install -y "$package" 2>&1) 1>/dev/null
     local result=$?
 
     printResult 0 $result
@@ -245,11 +248,6 @@ function listPackages {
     for pkg in $(apt list --upgradable 2>/dev/null | awk -F/ 'NR>1 {print $1}'); do
         echo "name: $pkg"
     done
-}
-
-function terminateScript {
-    printf "%s 🔥 %s%s\n" "$RED" "INSTALLATION TERMINATED" "$CLEAR"
-    kill -s TERM $TOP_PID
 }
 
 function runDockerCompose {
