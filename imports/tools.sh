@@ -163,8 +163,16 @@ function installRepo {
         for scriptName in $preRunScripts; do
             printProgress "Executing script \"$scriptName\"" "$CYAN"
             sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
-            bash "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
-            printResult 0 $?
+            resultText=$(bash "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName")
+            local result=$?
+
+            printResult 0 $result
+
+            if [ "$result" -ne 0 ]; then
+                printEmptyLine
+                printError "$resultText"
+                exit 1
+            fi
         done
 
         # RUNNING DOCKER COMPOSE
