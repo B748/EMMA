@@ -161,18 +161,7 @@ function installRepo {
         printStep "RUNNING PRE-INSTALL SCRIPTS"
 
         for scriptName in $preRunScripts; do
-            printProgress "Executing script \"$scriptName\"" "$CYAN"
-            sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
-            resultText=$(bash "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName")
-            local result=$?
-
-            printResult 0 $result
-
-            if [ "$result" -ne 0 ]; then
-                printEmptyLine
-                printError "$resultText"
-                exit 1
-            fi
+            runScript "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
         done
 
         # RUNNING DOCKER COMPOSE
@@ -203,11 +192,7 @@ function installRepo {
             printStep "RUNNING POST-INSTALL SCRIPTS"
 
             for scriptName in $postRunScripts; do
-                printProgress "Executing script \"$scriptName\"" "$CYAN"
-                printProgress "Executing script \"$scriptName\"" "$CYAN"
-                sudo chmod +x "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
-                bash "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
-                printResult 0 $?
+                runScript "$EMMA_DIR/dist-src/$repoName/_deploy/$scriptName"
             done
         else
             printProgress "Checking for Docker Installation Files" "$CYAN"
@@ -218,6 +203,23 @@ function installRepo {
 
     else
         printError "Repository not found."
+    fi
+}
+
+function runScript() {
+    local scriptPath=$1
+
+    printProgress "Executing script \"$(basename scriptName .sh)\"" "$CYAN"
+    sudo chmod +x "$scriptPath"
+    resultText=$(bash "$scriptPath")
+    local result=$?
+
+    printResult 0 $result
+
+    if [ "$result" -ne 0 ]; then
+        printEmptyLine
+        printError "$resultText"
+        exit 1
     fi
 }
 
