@@ -42,60 +42,67 @@ function prepareSystem {
         printResult 0 0 "$gitVersion"
     fi
 
-    printStep "CREATING TWO-WAY COMMUNICATION BASE"
+    createPipeSystem
+}
 
-    # NOMENCLATURE:
-    # DOCKER => CONTAINER = UPLINK ("TO SATELLITE")
-    # CONTAINER => DOCKER = DOWNLINK ("FROM SATELLITE")
-    local sendPipeName="docker-uplink"
-    local receivePipeName="docker-downlink"
-    local pipePath="$EMMA_DIR/pipes"
-    local senderPipePath="$pipePath/$sendPipeName"
-    local receiverPipePath="$pipePath/$receivePipeName"
+function createPipeSystem {
+        printStep "CREATING TWO-WAY COMMUNICATION BASE"
 
-    local receiverScriptName="downlink-processing.sh"
-    local receiverScriptUrl="$EMMA_URL/host/$receiverScriptName"
-    local receiverScriptPath="$EMMA_DIR/host/$receiverScriptName"
+        # NOMENCLATURE:
+        # DOCKER => CONTAINER = UPLINK ("TO SATELLITE")
+        # CONTAINER => DOCKER = DOWNLINK ("FROM SATELLITE")
+        local sendPipeName="docker-uplink"
+        local receivePipeName="docker-downlink"
 
-    if [ ! -d "$EMMA_DIR" ]; then
-        printProgress "Create EMMA main directory" "$CYAN"
-        sudo mkdir "$EMMA_DIR" >/dev/null 2>&1
-        sudo chown -R "$(id -u)":"$(id -g)" "$EMMA_DIR"
+        local pipePath="$EMMA_DIR/pipes"
+        local receiverScriptName="downlink-processing.sh"
+
+        local receiverScriptUrl="$EMMA_URL/host/$receiverScriptName"
+        local receiverScriptPath="$EMMA_DIR/host/$receiverScriptName"
+        local receiverPipePath="$pipePath/$receivePipeName"
+
+        local senderPipePath="$pipePath/$sendPipeName"
+
+        # CREATE/CHECK PIPES
+        if [ ! -d "$EMMA_DIR" ]; then
+            printProgress "Create EMMA main directory" "$CYAN"
+            sudo mkdir "$EMMA_DIR" >/dev/null 2>&1
+            sudo chown -R "$(id -u)":"$(id -g)" "$EMMA_DIR"
+            printResult 0 $?
+        fi
+
+        if [ ! -p "$receiverPipePath" ]; then
+            printProgress "Create receiver-pipe" "$CYAN"
+            mkdir -p "$pipePath"
+            mkfifo "$receiverPipePath" >/dev/null 2>&1
+            printResult 0 $?
+        fi
+
+        if [ ! -p "$senderPipePath" ]; then
+            printProgress "Create sender-pipe" "$CYAN"
+            mkfifo "$senderPipePath" >/dev/null 2>&1
+            printResult 0 $?
+        fi
+
+        printProgress "Download processing-script" "$CYAN"
+        curl -sSL "$receiverScriptUrl" --create-dirs -o "$receiverScriptPath" >/dev/null 2>&1
         printResult 0 $?
-    fi
 
-    if [ ! -p "$receiverPipePath" ]; then
-        printProgress "Create receiver-pipe" "$CYAN"
-        mkdir -p "$pipePath"
-        mkfifo "$receiverPipePath" >/dev/null 2>&1
+        printProgress "Make processing-script executable" "$CYAN"
+        sudo chmod +x "$receiverScriptPath" >/dev/null 2>&1
         printResult 0 $?
-    fi
 
-    if [ ! -p "$senderPipePath" ]; then
-        printProgress "Create sender-pipe" "$CYAN"
-        mkfifo "$senderPipePath" >/dev/null 2>&1
+        printProgress "Make processing-script reboot-proof" "$CYAN"
+        crontab -l | grep "$receiverScriptPath" > /dev/null 2<&1 || (crontab -l 2>/dev/null; echo "@reboot $receiverScriptPath $receiverPipePath") | crontab -
         printResult 0 $?
-    fi
 
-    printProgress "Download processing-script" "$CYAN"
-    curl -sSL "$receiverScriptUrl" --create-dirs -o "$receiverScriptPath" >/dev/null 2>&1
-    printResult 0 $?
+        printProgress "Stop running processing-script(s)" "$CYAN"
+        sudo pkill $receivePipeName
+        printResult 0 $? "" "NONE FOUND"
 
-    printProgress "Make processing-script executable" "$CYAN"
-    sudo chmod +x "$receiverScriptPath" >/dev/null 2>&1
-    printResult 0 $?
-
-    printProgress "Make processing-script reboot-proof" "$CYAN"
-    crontab -l | grep "$receiverScriptPath" > /dev/null 2<&1 || (crontab -l 2>/dev/null; echo "@reboot $receiverScriptPath $receiverPipePath") | crontab -
-    printResult 0 $?
-
-    printProgress "Stop running processing-script(s)" "$CYAN"
-    sudo pkill $receivePipeName
-    printResult 0 $? "" "NONE FOUND"
-
-    printProgress "Run processing-script" "$CYAN"
-    nohup "$receiverScriptPath" "$receiverPipePath" &> /dev/null &
-    printResult 0 $?
+        printProgress "Run processing-script" "$CYAN"
+        nohup "$receiverScriptPath" "$receiverPipePath" &> /dev/null &
+        printResult 0 $?
 }
 
 function installRepo {
