@@ -47,6 +47,28 @@ repos:
      ```
      This allows the script to authenticate and clone the repository.
 
+### Docker: Container-Host Communication
+Uses a pipe on the host system that is routed to the backend.
+
+##### Nomenclature:
+**DOWNLINK:** `/opt/emma/pipes/docker-downlink` = Sending commands from a docker container to the host system (satellite to ground-station). For security 
+reasons the commands are standardized (see `downlink-processing.sh`):
+* update vX.Y.Z (changes system to version)
+* check-update
+
+**UPLINK:** `/opt/emma/pipes/docker-uplink` = Sending commands from the host system to all docker containers that are linked to the pipe
+(ground-station to satellite). The docker file must contain the pipe in the volumes section:
+
+```
+volumes:
+- ...
+- /opt/emma/pipes:/hostpipe
+```
+
+
+
+see: https://stackoverflow.com/questions/32163955/how-to-run-shell-script-on-host-from-docker-container
+
 ### Dependencies
 The script requires the following tools:
 - `curl` (for downloading additional scripts dynamically)
