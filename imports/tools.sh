@@ -1,5 +1,47 @@
 # FUNCTIONS LIBRARY
 
+function validateDependencies {
+    printStep "VALIDATING REQUIRED TOOLS"
+    
+    local missingTools=()
+    
+    # Check curl
+    if ! command -v curl >/dev/null 2>&1; then
+        missingTools+=("curl")
+    fi
+    
+    # Check jq
+    if ! command -v jq >/dev/null 2>&1; then
+        missingTools+=("jq")
+    fi
+    
+    # Check python3
+    if ! command -v python3 >/dev/null 2>&1; then
+        missingTools+=("python3")
+    else
+        # Check for yaml module
+        if ! python3 -c "import yaml" 2>/dev/null; then
+            missingTools+=("python3-yaml")
+        fi
+    fi
+    
+    # Check docker
+    if ! command -v docker >/dev/null 2>&1; then
+        missingTools+=("docker")
+    fi
+    
+    if [ ${#missingTools[@]} -gt 0 ]; then
+        printProgress "Required tools check" "$CYAN"
+        printResult 0 1
+        printError "Missing required tools: ${missingTools[*]}"
+        printError "Please install missing dependencies and try again."
+        exit 1
+    else
+        printProgress "Required tools check" "$CYAN"
+        printResult 0 0
+    fi
+}
+
 function prepareSystem {
     # CHECK IF A CONFIGURATION FILE IS PROVIDED AS AN ARGUMENT
     local configFileName
@@ -20,6 +62,8 @@ function prepareSystem {
         CONFIG_DATA=$(yamlToJSON "$configFileName" "")
         printResult 0 $?
     fi
+
+    validateDependencies
 
     printProgress "Update package list" "$CYAN"
     sudo apt-get update >/dev/null 2>&1
