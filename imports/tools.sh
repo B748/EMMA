@@ -80,7 +80,7 @@ function prepareSystem {
         printResult 0 $?
     else
         local gitVersion
-        gitVersion=$(git -v)
+        gitVersion=$(git --version)
         gitVersion=${gitVersion##* }
         printProgress "Git version" "$CYAN"
         printResult 0 0 "$gitVersion"
