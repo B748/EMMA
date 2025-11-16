@@ -42,21 +42,94 @@ function validateDependencies {
     fi
 }
 
+function promptForConfig {
+    printStep "INTERACTIVE CONFIGURATION"
+    
+    printEmptyLine
+    echo -n "${CYAN}Enter your GitHub Personal Access Token (PAT): ${CLEAR}"
+    read -s pat
+    echo ""
+    
+    if [ -z "$pat" ]; then
+        printError "PAT cannot be empty."
+        exit 1
+    fi
+    
+    printEmptyLine
+    echo "${CYAN}Enter repository URLs (format: owner/repo)${CLEAR}"
+    echo "${CYAN}Press Enter after each repo. Enter empty line when done.${CLEAR}"
+    printEmptyLine
+    
+    local repos=()
+    local repo_input
+    local counter=1
+    
+    while true; do
+        echo -n "${CYAN}Repository #$counter: ${CLEAR}"
+        read -r repo_input
+        
+        if [ -z "$repo_input" ]; then
+            if [ ${#repos[@]} -eq 0 ]; then
+                printError "At least one repository is required."
+                exit 1
+            fi
+            break
+        fi
+        
+        repos+=("$repo_input")
+        ((counter++))
+    done
+    
+    # Build JSON structure
+    local repos_json=""
+    for repo in "${repos[@]}"; do
+        if [ -n "$repos_json" ]; then
+            repos_json="$repos_json,"
+        fi
+        repos_json="$repos_json\"$repo\""
+    done
+    
+    CONFIG_DATA="{\"pat\":\"$pat\",\"repos\":[$repos_json]}"
+    printEmptyLine
+}
+
 function prepareSystem {
     # CHECK IF A CONFIGURATION FILE IS PROVIDED AS AN ARGUMENT
     local configFileName
     configFileName="$1"
 
-    printProgress "Read configuration file" "$CYAN"
     if [ -z "$configFileName" ]; then
-        configFileName="$DIR/source.yaml"
-    fi
-
-    if [ ! -f "$configFileName" ]; then
-        printResult 0 1
-        printError "Configuration file \"$configFileName\" not found."
-        exit 1
+        # NO PARAMETER = INTERACTIVE MODE
+        promptForConfig
+    elif [[ "$configFileName" =~ ^https?:// ]]; then
+        # URL PROVIDED = DOWNLOAD CONFIG
+        printProgress "Download configuration file" "$CYAN"
+        local configContent
+        configContent=$(curl -sSL "$configFileName" 2>&1)
+        local result=$?
+        
+        if [ $result -ne 0 ] || [ -z "$configContent" ]; then
+            printResult 0 1
+            printError "Failed to download configuration from \"$configFileName\"."
+            exit 1
+        fi
+        
+        # Save to temp file and parse
+        local tempConfig="/tmp/emma-config-$$.yaml"
+        echo "$configContent" > "$tempConfig"
+        CONFIG_DATA=$(yamlToJSON "$tempConfig" "")
+        rm -f "$tempConfig"
+        printResult 0 $?
     else
+        # FILE PATH PROVIDED = USE LOCAL FILE
+        printProgress "Read configuration file" "$CYAN"
+        
+        if [ ! -f "$configFileName" ]; then
+            printResult 0 1
+            printError "Configuration file \"$configFileName\" not found."
+            exit 1
+        fi
+        
         # READING CONFIG FILE
         # shellcheck disable=SC2034
         CONFIG_DATA=$(yamlToJSON "$configFileName" "")
