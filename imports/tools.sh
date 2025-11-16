@@ -338,16 +338,32 @@ function checkDockerContainerStatus {
 
 yamlToJSON() {
     local json
-    json=$(python3 -c "import yaml;print(yaml.safe_load(open('$1'))$2)")
+    json=$(python3 -c "import yaml;print(yaml.safe_load(open('$1'))$2)" 2>&1)
+    local result=$?
+    
+    if [ $result -ne 0 ]; then
+        echo "ERROR: Failed to parse YAML file '$1': $json" >&2
+        return 1
+    fi
+    
     json="${json//\'/\"}"
     json="${json//: None/: null}"
     echo "$json"
+    return 0
 }
 
 getJSONValue() {
     local selection=$1
     local json=$2
     local result
-    result="$(jq -r "$selection" <<< "$json")"
+    result="$(jq -r "$selection" <<< "$json" 2>&1)"
+    local exitCode=$?
+    
+    if [ $exitCode -ne 0 ]; then
+        echo "ERROR: Failed to parse JSON with selector '$selection': $result" >&2
+        return 1
+    fi
+    
     echo "$result"
+    return 0
 }
