@@ -42,18 +42,18 @@ function printHeader {
         local rightCount=$((LINE_LENGTH - 2 * margin - 4 - leftCount - length))
 
         printf " %.0s" $(seq $margin);
-        printf "$vLine";
+        printf "%s" $vLine;
         printf " %.0s" $(seq $leftCount);
         printf " %s%s%s%s " "$BOLD" "$line" "$CLEAR" "$POWDER_BLUE";
         printf " %.0s" $(seq $rightCount);
-        printf "$vLine\n"
+        printf "%s\n" $vLine;
     done
-    IFS=$' \n\t'
+    IFS=$' \t\n'
 
     printf " %.0s" $(seq $margin);
-    printf "$cornerBL"
+    printf "%s" $cornerBL;
     printf "$hLine%.0s" $(seq $((LINE_LENGTH - 2 - 2 * margin)));
-    printf "$cornerBR%s\n\n" "$CLEAR"
+    printf "%s%s\n\n" $cornerBR "$CLEAR";
 }
 
 function printSectionSubHeadline {
@@ -147,10 +147,10 @@ function printResult {
     failReturnLength=${#failReturn}
 
     if [ "$returnVal" -eq "$okVal" ]; then
-        for i in $(seq $((okReturnLength - 1))); do tput cub1; done
+        for _ in $(seq $((okReturnLength - 1))); do tput cub1; done
         printf "%s%s%s\n" "$GREEN" "$okReturn" "$CLEAR"
     else
-        for i in $(seq $((failReturnLength - 1))); do tput cub1; done
+        for _ in $(seq $((failReturnLength - 1))); do tput cub1; done
         printf "%s%s%s\n" "$RED" "$failReturn" "$CLEAR"
     fi
 

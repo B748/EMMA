@@ -278,7 +278,7 @@ function installRepo {
         printResult 0 $?
 
         # INSTALLING REQUIRED DEPENDENCIES
-        printStep "INSTALLING REQUIRED packageS"
+        printStep "INSTALLING REQUIRED PACKAGES"
 
         for packageName in $requiredRepoPackages; do
             installPackage "$packageName"
