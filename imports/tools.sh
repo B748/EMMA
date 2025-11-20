@@ -179,6 +179,7 @@ function createPipeSystem {
         local receiverPipePath="$pipePath/$receivePipeName"
 
         local senderPipePath="$pipePath/$sendPipeName"
+        local patFilePath="$EMMA_DIR/.pat"
 
         # CREATE/CHECK PIPES
         if [ ! -d "$EMMA_DIR" ]; then
@@ -209,6 +210,11 @@ function createPipeSystem {
         sudo chmod +x "$receiverScriptPath" >/dev/null 2>&1
         printResult 0 $?
 
+        printProgress "Store PAT securely" "$CYAN"
+        echo "$PAT" > "$patFilePath"
+        chmod 600 "$patFilePath" >/dev/null 2>&1
+        printResult 0 $?
+
         printProgress "Make processing-script reboot-proof" "$CYAN"
         crontab -l | grep "$receiverScriptPath" > /dev/null 2<&1 || (crontab -l 2>/dev/null; echo "@reboot $receiverScriptPath $receiverPipePath") | crontab -
         printResult 0 $?
@@ -218,8 +224,13 @@ function createPipeSystem {
         printResult 0 $? "" "NONE FOUND"
 
         printProgress "Run processing-script" "$CYAN"
-        nohup "$receiverScriptPath" "$receiverPipePath" &> /dev/null &
-        printResult 0 $?
+        nohup "$receiverScriptPath" "$receiverPipePath" "$patFilePath" &> /dev/null &
+        sleep 0.5
+        if pgrep -f "$receiverScriptName" > /dev/null; then
+            printResult 0 0
+        else
+            printResult 0 1
+        fi
 }
 
 function installRepo {
