@@ -216,11 +216,12 @@ function createPipeSystem {
         printResult 0 $?
 
         printProgress "Make processing-script reboot-proof" "$CYAN"
-        crontab -l | grep "$receiverScriptPath" > /dev/null 2<&1 || (crontab -l 2>/dev/null; echo "@reboot $receiverScriptPath $receiverPipePath") | crontab -
+        crontab -l | grep "$receiverScriptPath" > /dev/null 2>&1 || (crontab -l 2>/dev/null; echo "@reboot $receiverScriptPath $receiverPipePath $patFilePath") | crontab -
         printResult 0 $?
 
         printProgress "Stop running processing-script(s)" "$CYAN"
-        sudo pkill $receivePipeName
+        sudo pkill -f "$receiverScriptName"
+        sleep 1
         printResult 0 $? "" "NONE FOUND"
 
         printProgress "Run processing-script" "$CYAN"
