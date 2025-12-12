@@ -45,6 +45,16 @@ function validateDependencies {
 function promptForConfig {
     printStep "INTERACTIVE CONFIGURATION"
     
+    # Check if we're in a piped environment
+    if [ ! -t 0 ]; then
+        printError "Interactive mode requires a terminal."
+        printError "Please run the script directly or provide a config file:"
+        printError "  bash <(curl -sSL https://raw.githubusercontent.com/B748/EMMA/main/install.sh)"
+        printError "  OR"
+        printError "  curl -sSL https://raw.githubusercontent.com/B748/EMMA/main/install.sh | bash -s -- config.yaml"
+        exit 1
+    fi
+    
     printEmptyLine
     echo -n "${CYAN}Enter your GitHub Personal Access Token (PAT): ${CLEAR}"
     read -s pat
