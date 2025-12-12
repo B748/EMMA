@@ -81,11 +81,11 @@ setSectionEnd
 
 printEmptyLine
 
-REPOS="$(jq '.repos  | values[]' <<< "$CONFIG_DATA")"
-PAT="$(jq '.pat' <<< "$CONFIG_DATA")"
-PAT=$(sed -e 's/^"//' -e 's/"$//' <<<"$PAT")
+REPOS="$(jq -c '.repos[]' <<< "$CONFIG_DATA")"
+PAT="$(jq -r '.pat' <<< "$CONFIG_DATA")"
 
-for currentRepoUrl in $REPOS; do
-    currentRepoUrl=$(sed -e 's/^"//' -e 's/"$//' <<<"$currentRepoUrl")
-    installRepo "$PAT" "$currentRepoUrl"
-done
+while IFS= read -r repo_config; do
+    currentRepoUrl=$(jq -r '.repo' <<< "$repo_config")
+    composePath=$(jq -r '.composePath' <<< "$repo_config")
+    installRepo "$PAT" "$currentRepoUrl" "$composePath"
+done <<< "$REPOS"

@@ -56,16 +56,15 @@ function promptForConfig {
     fi
     
     printEmptyLine
-    echo "${CYAN}Enter repository URLs (format: owner/repo)${CLEAR}"
+    echo "${CYAN}Enter repository configuration${CLEAR}"
     echo "${CYAN}Press Enter after each repo. Enter empty line when done.${CLEAR}"
     printEmptyLine
     
     local repos=()
-    local repo_input
     local counter=1
     
     while true; do
-        echo -n "${CYAN}Repository #$counter: ${CLEAR}"
+        echo -n "${CYAN}Repository #$counter (owner/repo): ${CLEAR}"
         read -r repo_input
         
         if [ -z "$repo_input" ]; then
@@ -76,8 +75,16 @@ function promptForConfig {
             break
         fi
         
-        repos+=("$repo_input")
+        echo -n "${CYAN}Docker Compose path (default: _deploy/compose.yaml): ${CLEAR}"
+        read -r compose_path
+        
+        if [ -z "$compose_path" ]; then
+            compose_path="_deploy/compose.yaml"
+        fi
+        
+        repos+=("{\"repo\":\"$repo_input\",\"composePath\":\"$compose_path\"}")
         ((counter++))
+        printEmptyLine
     done
     
     # Build JSON structure
@@ -86,7 +93,7 @@ function promptForConfig {
         if [ -n "$repos_json" ]; then
             repos_json="$repos_json,"
         fi
-        repos_json="$repos_json\"$repo\""
+        repos_json="$repos_json$repo"
     done
     
     CONFIG_DATA="{\"pat\":\"$pat\",\"repos\":[$repos_json]}"
@@ -238,6 +245,7 @@ function installRepo {
     if [ -n "$2" ] ; then
         local pat=$1
         local repoUrl=$2
+        local composePath=$3
         local resultText
 
         local repoFileName
@@ -304,7 +312,7 @@ function installRepo {
         done
 
         # RUNNING DOCKER COMPOSE
-        local dockerComposeFileName=$EMMA_DIR/dist-src/$repoName/_deploy/compose.yaml
+        local dockerComposeFileName=$EMMA_DIR/dist-src/$repoName/$composePath
 
         if [ -e "$dockerComposeFileName" ]; then
             runDockerCompose "$dockerComposeFileName"
